@@ -1,0 +1,3 @@
+fullnameOverride: "rabbitmq-cluster-operator"
+msgTopologyOperator:
+  fullnameOverride: "rabbitmq-cluster-operator-message-topology"
