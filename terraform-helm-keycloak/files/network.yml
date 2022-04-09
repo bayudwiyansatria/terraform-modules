@@ -1,0 +1,15 @@
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+    https: 443
+  nodePorts:
+    http: ""
+    https: ""
+  sessionAffinity: None
+  clusterIP: ""
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy: Cluster
+  annotations: {}
+  extraPorts: []

@@ -1,0 +1,8 @@
+fullnameOverride: "keycloak"
+postgresql:
+  enabled: true
+  architecture: standalone
+externalDatabase:
+  host: ""
+  port: 5432
+  database: bitnami_keycloak

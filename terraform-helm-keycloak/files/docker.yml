@@ -1,0 +1,4 @@
+image:
+  registry: docker.io
+  repository: bitnami/keycloak
+  tag: 16.1.1-debian-10-r67

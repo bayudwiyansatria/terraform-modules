@@ -1,0 +1,15 @@
+ingress:
+  enabled: false
+  ingressClassName: ""
+  pathType: ImplementationSpecific
+  apiVersion: ""
+  hostname: keycloak.local
+  path: /
+  servicePort: http
+  annotations: {}
+  tls: false
+  selfSigned: false
+  extraHosts: []
+  extraPaths: []
+  extraTls: []
+  secrets: []
