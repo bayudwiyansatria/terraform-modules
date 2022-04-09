@@ -1,0 +1,61 @@
+datasources: {}
+plugins: []
+notifiers: {}
+dashboardProviders: {}
+dashboards: {}
+dashboardsConfigMaps: {}
+sidecar:
+  image:
+    repository: quay.io/kiwigrid/k8s-sidecar
+    tag: 1.15.6
+    sha: ""
+  imagePullPolicy: IfNotPresent
+  resources: {}
+  securityContext: {}
+  enableUniqueFilenames: false
+  dashboards:
+    enabled: false
+    SCProvider: true
+    label: grafana_dashboard
+    labelValue: null
+    folder: /tmp/dashboards
+    defaultFolderName: null
+    searchNamespace: null
+    watchMethod: WATCH
+    resource: both
+    folderAnnotation: null
+    script: null
+    provider:
+      name: sidecarProvider
+      orgid: 1
+      folder: ''
+      type: file
+      disableDelete: false
+      allowUiUpdates: false
+      foldersFromFilesStructure: false
+    extraMounts: []
+  datasources:
+    enabled: false
+    label: grafana_datasource
+    labelValue: null
+    searchNamespace: null
+    watchMethod: WATCH
+    resource: both
+    reloadURL: "http://localhost:3000/api/admin/provisioning/datasources/reload"
+    skipReload: false
+    initDatasources: false
+  plugins:
+    enabled: false
+    label: grafana_plugin
+    labelValue: null
+    searchNamespace: null
+    watchMethod: WATCH
+    resource: both
+    reloadURL: "http://localhost:3000/api/admin/provisioning/plugins/reload"
+    skipReload: false
+    initPlugins: false
+  notifiers:
+    enabled: false
+    label: grafana_notifier
+    searchNamespace: null
+    resource: both
