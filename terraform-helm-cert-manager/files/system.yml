@@ -1,0 +1,8 @@
+installCRDs: true
+replicaCount: 1
+featureGates: ""
+ingressShim: {}
+webhook:
+  replicaCount: 1
+cainjector:
+  replicaCount: 1

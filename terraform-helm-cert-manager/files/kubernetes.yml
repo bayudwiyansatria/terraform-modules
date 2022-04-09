@@ -1,0 +1,11 @@
+resources: { }
+webhook:
+  resources: { }
+  nodeSelector: { }
+  affinity: { }
+  tolerations: [ ]
+cainjector:
+  resources: { }
+  nodeSelector: { }
+  affinity: { }
+  tolerations: [ ]

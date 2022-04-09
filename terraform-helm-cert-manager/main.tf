@@ -1,6 +1,12 @@
 locals {
   cert_manager_default_values = [
-    file("${path.module}/files/default.yml")
+    file("${path.module}/files/default.yml"),
+    file("${path.module}/files/docker.yml"),
+    file("${path.module}/files/kubernetes.yml"),
+    file("${path.module}/files/system.yml"),
+
+    file("${path.module}/files/config.yml"),
+    file("${path.module}/files/monitor.yml")
   ]
 
   cert_manager_values = [for i in var.cert_manager_values : i]
@@ -16,7 +22,7 @@ resource "helm_release" "cert-manager" {
   version    = "v1.7.2"
 
   create_namespace = true
-  namespace        = "cert-manager"
+  namespace        = var.kubernetes_namespace
 
   values = local.cert_manager
 }
@@ -30,7 +36,7 @@ resource "kubernetes_manifest" "certificate-issuer-staging" {
     }
     "spec" : {
       "acme" : {
-        "email" : "bayudwiyansatria@gmail.com"
+        "email" : var.certificate_mailing_address
         "server" : "https://acme-staging-v02.api.letsencrypt.org/directory"
         "privateKeySecretRef" : {
           name : "letsencrypt-staging"
@@ -62,7 +68,7 @@ resource "kubernetes_manifest" "certificate-issuer-production" {
     }
     "spec" : {
       "acme" : {
-        "email" : "bayudwiyansatria@gmail.com"
+        "email" : var.certificate_mailing_address
         "server" : "https://acme-v02.api.letsencrypt.org/directory"
         "privateKeySecretRef" : {
           name : "letsencrypt-production"
