@@ -1,0 +1,21 @@
+service:
+  type: LoadBalancer
+  ports:
+    http: 80
+    https: 443
+  targetPorts:
+    http: http
+    https: https
+  nodePorts:
+    http: ""
+    https: ""
+    tcp: {}
+    udp: {}
+  annotations: {}
+  labels: {}
+  clusterIP: ""
+  externalIPs: []
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy: ""
+  healthCheckNodePort: 0

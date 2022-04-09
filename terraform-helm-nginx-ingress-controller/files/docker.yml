@@ -1,0 +1,6 @@
+image:
+  registry: docker.io
+  repository: bitnami/nginx-ingress-controller
+  tag: 1.1.2-debian-10-r10
+  pullPolicy: IfNotPresent
+  pullSecrets: []
