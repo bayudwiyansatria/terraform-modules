@@ -1,0 +1,9 @@
+ingress:
+  enabled: false
+  annotations: { }
+  className: "nginx"
+  paths:
+  - /
+  customPaths: [ ]
+  hosts: [ ]
+  tls: [ ]

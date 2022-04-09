@@ -1,0 +1,8 @@
+service:
+  type: ClusterIP
+  externalPort: 443
+  annotations: {}
+  labels: {}
+  clusterServiceLabel:
+    enabled: true
+    key: "kubernetes.io/cluster-service"
