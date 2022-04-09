@@ -1,0 +1,6 @@
+image:
+  registry: docker.io
+  repository: bitnami/metrics-server
+  tag: 0.6.1-debian-10-r34
+  pullPolicy: IfNotPresent
+  pullSecrets: []

@@ -1,0 +1,8 @@
+fullnameOverride: "metrics-server"
+replicas: 1
+hostNetwork: true
+extraArgs:
+  kubelet-insecure-tls: true
+  kubelet-preferred-address-types: InternalIP
+apiService:
+  create: true
