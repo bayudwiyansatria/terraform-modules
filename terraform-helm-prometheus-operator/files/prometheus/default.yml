@@ -1,0 +1,78 @@
+prometheus:
+  prometheusSpec:
+    tolerations: [ ]
+    topologySpreadConstraints: [ ]
+    alertingEndpoints: [ ]
+    externalLabels: { }
+    replicaExternalLabelName: ""
+    replicaExternalLabelNameClear: false
+    prometheusExternalLabelName: ""
+    prometheusExternalLabelNameClear: false
+    externalUrl: ""
+    nodeSelector: { }
+    secrets: [ ]
+    configMaps: [ ]
+    query: { }
+    ruleNamespaceSelector: { }
+    ruleSelectorNilUsesHelmValues: true
+    ruleSelector: { }
+    serviceMonitorSelectorNilUsesHelmValues: true
+    serviceMonitorSelector: { }
+    serviceMonitorNamespaceSelector: { }
+    podMonitorSelectorNilUsesHelmValues: true
+    podMonitorSelector: { }
+    podMonitorNamespaceSelector: { }
+    probeSelectorNilUsesHelmValues: true
+    probeSelector: { }
+    probeNamespaceSelector: { }
+    retention: 10d
+    retentionSize: ""
+    walCompression: false
+    paused: false
+    replicas: 1
+    shards: 1
+    logLevel: info
+    logFormat: logfmt
+    routePrefix: /
+    podMetadata: { }
+    podAntiAffinity: ""
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: { }
+    remoteRead: [ ]
+    additionalRemoteRead: [ ]
+    remoteWrite: [ ]
+    additionalRemoteWrite: [ ]
+    remoteWriteDashboards: false
+    volumes: [ ]
+    volumeMounts: [ ]
+    additionalScrapeConfigs: [ ]
+    additionalScrapeConfigsSecret: { }
+    additionalPrometheusSecretsAnnotations: { }
+    additionalAlertManagerConfigs: [ ]
+    additionalAlertManagerConfigsSecret: { }
+    additionalAlertRelabelConfigs: [ ]
+    securityContext:
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+    priorityClassName: ""
+    containers: [ ]
+    initContainers: [ ]
+    portName: "http-web"
+    arbitraryFSAccessThroughSMs: false
+    overrideHonorLabels: false
+    overrideHonorTimestamps: false
+    ignoreNamespaceSelectors: false
+    enforcedNamespaceLabel: ""
+    prometheusRulesExcludedFromEnforce: [ ]
+    queryLogFile: false
+    enforcedSampleLimit: false
+    enforcedTargetLimit: false
+    enforcedLabelLimit: false
+    enforcedLabelNameLengthLimit: false
+    enforcedLabelValueLengthLimit: false
+    allowOverlappingBlocks: false
+  additionalRulesForClusterRole: [ ]
+  additionalServiceMonitors: [ ]
+  additionalPodMonitors: [ ]

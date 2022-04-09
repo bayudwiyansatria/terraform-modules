@@ -1,0 +1,6 @@
+alertmanager:
+  alertmanagerSpec:
+    image:
+      repository: quay.io/prometheus/alertmanager
+      tag: v0.23.0
+      sha: ""

@@ -1,0 +1,23 @@
+grafana:
+  namespaceOverride: ""
+  forceDeployDatasources: false
+  forceDeployDashboards: false
+  defaultDashboardsEnabled: true
+  defaultDashboardsTimezone: utc
+  rbac:
+    pspEnabled: false
+  extraConfigmapMounts: []
+  deleteDatasources: []
+  additionalDataSources: []
+  service:
+    portName: http-web
+  serviceMonitor:
+    enabled: true
+    path: "/metrics"
+    #  namespace: monitoring
+    labels: {}
+    interval: ""
+    scheme: http
+    tlsConfig: {}
+    scrapeTimeout: 30s
+    relabelings: []

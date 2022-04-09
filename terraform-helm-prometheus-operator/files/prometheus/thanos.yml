@@ -1,0 +1,52 @@
+prometheus:
+  thanos: { }
+  thanosService:
+    enabled: false
+    annotations: { }
+    labels: { }
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+    portName: grpc
+    port: 10901
+    targetPort: "grpc"
+    httpPortName: http
+    httpPort: 10902
+    targetHttpPort: "http"
+    clusterIP: "None"
+    nodePort: 30901
+    httpNodePort: 30902
+  thanosServiceMonitor:
+    enabled: false
+    interval: ""
+    scheme: ""
+    tlsConfig: { }
+    bearerTokenFile:
+    metricRelabelings: [ ]
+    relabelings: [ ]
+  thanosServiceExternal:
+    enabled: false
+    annotations: { }
+    labels: { }
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: [ ]
+    portName: grpc
+    port: 10901
+    targetPort: "grpc"
+    httpPortName: http
+    httpPort: 10902
+    targetHttpPort: "http"
+    externalTrafficPolicy: Cluster
+    type: LoadBalancer
+    nodePort: 30901
+    httpNodePort: 30902
+  thanosIngress:
+    enabled: false
+    ingressClassName: nginx
+    annotations: { }
+    labels: { }
+    servicePort: 10901
+    nodePort: 30901
+    hosts: [ ]
+    paths: [ ]
+    pathType: ImplementationSpecific
+    tls: [ ]

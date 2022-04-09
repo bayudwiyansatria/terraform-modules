@@ -1,0 +1,9 @@
+ingress:
+  enabled: false
+  ingressClassName: nginx
+  annotations: { }
+  labels: { }
+  hosts: [ ]
+  paths: [ ]
+  pathType: ImplementationSpecific
+  tls: [ ]

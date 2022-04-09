@@ -1,0 +1,39 @@
+alertmanager:
+  alertmanagerSpec:
+    podMetadata: { }
+    useExistingSecret: false
+    secrets: [ ]
+    configMaps: [ ]
+    # configSecret: ""
+    alertmanagerConfigSelector: { }
+    alertmanagerConfigNamespaceSelector: { }
+    alertmanagerConfiguration: { }
+    logFormat: logfmt
+    logLevel: info
+    replicas: 1
+    retention: 120h
+    externalUrl:
+    routePrefix: /
+    paused: false
+    nodeSelector: { }
+    resources: { }
+    podAntiAffinity: ""
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: { }
+    tolerations: [ ]
+    topologySpreadConstraints: [ ]
+    securityContext:
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+    listenLocal: false
+    containers: [ ]
+    volumes: [ ]
+    volumeMounts: [ ]
+    initContainers: [ ]
+    priorityClassName: ""
+    additionalPeers: [ ]
+    portName: "http-web"
+    clusterAdvertiseAddress: false
+    forceEnableClusterMode: false
