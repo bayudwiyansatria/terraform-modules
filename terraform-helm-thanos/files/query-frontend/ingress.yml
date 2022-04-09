@@ -1,0 +1,14 @@
+queryFrontend:
+  ingress:
+    enabled: false
+    hostname: thanos.local
+    ingressClassName: ""
+    annotations: { }
+    extraHosts: [ ]
+    extraTls: [ ]
+    secrets: [ ]
+    tls: false
+    selfSigned: false
+    apiVersion: ""
+    path: /
+    pathType: ImplementationSpecific

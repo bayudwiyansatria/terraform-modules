@@ -1,0 +1,4 @@
+minio:
+  auth:
+    rootUser: admin
+    rootPassword: ""

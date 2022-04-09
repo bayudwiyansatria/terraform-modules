@@ -1,0 +1,102 @@
+queryFrontend:
+  enabled: true
+  logLevel: info
+  logFormat: logfmt
+  config: ""
+  existingConfigmap: ""
+  extraEnvVars: [ ]
+  extraEnvVarsCM: ""
+  extraEnvVarsSecret: ""
+  extraFlags: [ ]
+  command: [ ]
+  args: [ ]
+  replicaCount: 1
+  updateStrategy:
+    type: RollingUpdate
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+  resources:
+    limits: { }
+    requests: { }
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    timeoutSeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 6
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    timeoutSeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 6
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 15
+    successThreshold: 1
+  customLivenessProbe: { }
+  customReadinessProbe: { }
+  customStartupProbe: { }
+  initContainers: [ ]
+  sidecars: [ ]
+  extraVolumes: [ ]
+  extraVolumeMounts: [ ]
+  podAffinityPreset: ""
+  podAntiAffinityPreset: soft
+  nodeAffinityPreset:
+    type: ""
+    key: ""
+    values: [ ]
+  affinity: { }
+  nodeSelector: { }
+  tolerations: [ ]
+  podLabels: { }
+  podAnnotations: { }
+  hostAliases: [ ]
+  lifecycleHooks: { }
+  priorityClassName: ""
+  schedulerName: ""
+  topologySpreadConstraints: [ ]
+  service:
+    type: ClusterIP
+    ports:
+      http: 9090
+    nodePorts:
+      http: ""
+    clusterIP: ""
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: [ ]
+    externalTrafficPolicy: Cluster
+    annotations: { }
+    extraPorts: [ ]
+    labelSelectorsOverride: { }
+  serviceAccount:
+    annotations: { }
+    existingServiceAccount: ""
+    automountServiceAccountToken: true
+  rbac:
+    create: false
+    rules: [ ]
+  pspEnabled: false
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  pdb:
+    create: false
+    minAvailable: 1
+    maxUnavailable: ""

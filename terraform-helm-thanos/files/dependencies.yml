@@ -1,0 +1,16 @@
+receive:
+  enabled: false
+minio:
+  enabled: false
+bucketweb:
+  enabled: false
+storegateway:
+  enabled: false
+compactor:
+  enabled: false
+ruler:
+  enabled: false
+queryFrontend:
+  enabled: true
+query:
+  enabled: true

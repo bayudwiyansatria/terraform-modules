@@ -1,0 +1,12 @@
+ruler:
+  ingress:
+    enabled: false
+    hostname: thanos-ruler.local
+    ingressClassName: ""
+    annotations: { }
+    extraHosts: [ ]
+    extraTls: [ ]
+    secrets: [ ]
+    apiVersion: ""
+    path: /
+    pathType: ImplementationSpecific

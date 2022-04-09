@@ -1,0 +1,14 @@
+compactor:
+  ingress:
+    enabled: false
+    hostname: thanos-compactor.local
+    ingressClassName: ""
+    annotations: { }
+    extraHosts: [ ]
+    extraTls: [ ]
+    secrets: [ ]
+    tls: false
+    selfSigned: false
+    apiVersion: ""
+    path: /
+    pathType: ImplementationSpecific

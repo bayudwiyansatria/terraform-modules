@@ -1,0 +1,9 @@
+ruler:
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessModes:
+    - ReadWriteOnce
+    size: 8Gi
+    annotations: {}
+    existingClaim: ""

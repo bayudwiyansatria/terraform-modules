@@ -1,0 +1,27 @@
+query:
+  ingress:
+    enabled: false
+    hostname: thanos.local
+    ingressClassName: ""
+    annotations: {}
+    extraHosts: []
+    extraTls: []
+    secrets: []
+    tls: false
+    selfSigned: false
+    apiVersion: ""
+    path: /
+    pathType: ImplementationSpecific
+    grpc:
+      enabled: false
+      hostname: thanos-grpc.local
+      ingressClassName: ""
+      annotations: {}
+      extraHosts: []
+      extraTls: []
+      secrets: []
+      tls: false
+      selfSigned: false
+      apiVersion: ""
+      path: /
+      pathType: ImplementationSpecific

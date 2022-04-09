@@ -1,0 +1,14 @@
+receive:
+  ingress:
+    enabled: false
+    hostname: thanos-receive.local
+    ingressClassName: ""
+    annotations: { }
+    extraHosts: [ ]
+    extraTls: [ ]
+    secrets: [ ]
+    tls: false
+    selfSigned: false
+    apiVersion: ""
+    path: /
+    pathType: ImplementationSpecific
