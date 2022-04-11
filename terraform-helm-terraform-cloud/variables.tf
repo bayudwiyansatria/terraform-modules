@@ -4,6 +4,7 @@ variable "terraform_cloud_key" {
 }
 
 variable "terraform_workspace_key" {
+  sensitive = true
   type      = list(map(string))
 }
 
