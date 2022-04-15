@@ -2,24 +2,18 @@
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
-![Github Actions](https://github.com/bayudwiyansatria/Development-And-Operations/workflows/Github%20Action/badge.svg)
+Terraform Modules For Terragrunt
 
-Global Template Repository for Development and Operations Of Your Projects.
+See Also:
 
-| Key|Values|
-| ------| ----- |
-| Author| Bayu Dwiyan Satria |
-| Email | bayudwiyansatria@gmail.com |
-| Phone | +62-823-9602-9583 |
-| Website | [https://bayudwiyansatria.com](https://bayudwiyansatria.com) |
+- [Infrastructure Templates](https://github.com/bayudwiyansatria/infrastructure)
+- [Terragrunt Components](https://github.com/bayudwiyansatria/terragrunt-components)
 
 ## Table of Contents
 
 * [Dependencies](#dependencies)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
-* [Development](#development)
-* [Usage](#usage)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -29,35 +23,93 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
-```shell
-apt-get -y install git
-```
-
-Or
-
-```shell
-yum -y install git
-```
+1. Install [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+2. Install [terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 
 ### Installation
 
-A step by step series of examples that tell you how to get a development env running
+Put terragrunt component on your infrastructure as code repository.
 
-Say what the step will be clone this repository.
-
+Assume:
 ```shell
-git clone git@github.com:bayudwiyansatria/Development-And-Operations.git
+|-- infrastructure
+|   |-- terraform <- CLONE tERRAFORM MODULES HERE
+|   |   |-- terraform-helm-metrics-server
+|   |       |-- main.tf
+|   |       `-- variables.tf
+|   |   |-- terraform-helm-kubernetes-dashboard
+|   |       |-- main.tf
+|   |       `-- variables.tf
+|   |   `-- terraform-helm-nginx-ingress-controller
+|   |       |-- main.tf
+|   |       `-- variables.tf
+|   |-- terragrunt
+|   |   |-- components
+|   |   |   |-- kubernetes-dashboard
+|   |   |   |   |-- provider.hcl
+|   |   |   |   `-- terragrunt.hcl
+|   |   |   |-- metrics-server
+|   |   |   |   |-- provider.hcl
+|   |   |   |   `-- terragrunt.hcl
+|   |   |   `-- nginx-ingress-controller
+|   |   |       |-- provider.hcl
+|   |   |       `-- terragrunt.hcl
+|   |   |-- accounts
+|   |   |   `docker-desktop.yaml
+|   |   |-- _templates
+|   |   |   |-- backend-local.tpl
+|   |   |   `-- backend-tfc.tpl
+|   |   |-- live
+|   |   |   |-- bayudwiyansatria
+|   |   |   |   |-- docker-desktop
+|   |   |   |   |   |-- dev
+|   |   |   |   |   |   |-- metrics-server
+|   |   |   |   |   |   |   `-- terragrunt.hcl
+|   |   |   |   |   |   |-- kubernetes-dashboard
+|   |   |   |   |   |   |   `-- terragrunt.hcl
+|   |   |   |   |   |   `-- nginx-ingress-controller
+|   |   |   |   |   |       `-- terragrunt.hcl
+|   |   |   |   |   |-- stag
+|   |   |   |   |   `-- prod
+|   |   |   |   `-- aws
+|   |   |   |       |-- dev
+|   |   |   |       |   |-- metrics-server
+|   |   |   |       |   |   `-- terragrunt.hcl
+|   |   |   |       |   |-- kubernetes-dashboard
+|   |   |   |       |   |   `-- terragrunt.hcl
+|   |   |   |       |   `-- nginx-ingress-controller
+|   |   |   |       |       `-- terragrunt.hcl
+|   |   |   |       |-- stag
+|   |   |   |       `-- prod 
+|   |   |   `-- other-account
+|   |   |       |-- docker-desktop
+|   |   |       |   `-- prod
+|   |   |       `-- aws
+|   |   `-- terragrunt.hcl
+|   `-- terraform
+|       |-- metrics-server
+|       |   `-- main.tf
+|       |-- nginx-ingress-controller
+|       |   `-- main.tf
+|       `-- kubernetes-dashboard
+|           `-- main.tf
+|-- README.md
+|-- NOTICE
+|-- LICENSE
+`-- SECURITY.md
 ```
 
-## Development
+Cloning Project
 
--*Release 1.0* : **2019, Nov**.
+```shell
+git clone git@github.com:bayudwiyansatria/terraform-modules.git terraform
+```
 
-## Usage
+Or you can use submodule to get updates from community
 
-Reference and programming instructional materials.
+```shell
+git submodule add git@github.com:bayudwiyansatria/terraform-modules.git terraform
+```
 
 ## Contributing
 
@@ -79,13 +131,13 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **[Bayu Dwiyan Satria](https://github.com/bayudwiyansatria)** - *Initial work*
+* **[Bayu Dwiyan Satria](https://github.com/bayudwiyansatria)**
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-<p> Copyright &copy; 2017 - 2019 Public Use. All Rights Reserved.
+<p> Copyright &copy; 2017 - 2022 Public Use. All Rights Reserved.
 
 ## Acknowledgments
 
