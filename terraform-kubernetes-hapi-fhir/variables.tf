@@ -1,12 +1,12 @@
 variable "kubernetes_name" {
   type    = string
-  default = "hapi-fhrir"
+  default = "hapi-fhir"
 }
 
 variable "kubernetes_label" {
   type    = map(string)
   default = {
-    app = "hapi-fhrir"
+    app = "hapi-fhir"
   }
 }
 

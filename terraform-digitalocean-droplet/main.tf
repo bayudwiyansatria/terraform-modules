@@ -18,8 +18,6 @@ resource "digitalocean_droplet" "droplet" {
   name     = "${var.name}-${count.index + 1}"
   region   = var.region
   size     = var.size
-  ssh_keys = [
-    "7b:33:e5:91:ad:a9:4e:21:58:58:24:e6:57:0c:96:64"
-  ]
+  ssh_keys = var.server_keys
   vpc_uuid = var.vpc_id
 }

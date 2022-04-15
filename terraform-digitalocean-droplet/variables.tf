@@ -31,6 +31,12 @@ variable "server_count" {
   default   = 1
 }
 
+variable "server_keys" {
+  sensitive = false
+  type      = number
+  default   = []
+}
+
 variable "vpc_id" {
   sensitive   = false
   type        = string

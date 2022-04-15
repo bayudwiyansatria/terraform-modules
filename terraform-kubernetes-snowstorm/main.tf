@@ -41,7 +41,7 @@ resource "kubernetes_ingress_v1" "ingress" {
   }
 }
 
-resource "kubernetes_service" "snow_strom_frontend" {
+resource "kubernetes_service" "snow_storm_frontend" {
   metadata {
     name   = "${var.kubernetes_name}-frontend"
     labels = var.kubernetes_label
