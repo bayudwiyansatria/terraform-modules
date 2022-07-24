@@ -17,7 +17,7 @@ resource "helm_release" "nginx-ingress-controller" {
   name       = "nginx-ingress-controller"
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "nginx-ingress-controller"
-  version    = "9.0.9"
+  version    = "9.2.18"
 
   create_namespace = true
   namespace        = "kube-system"
