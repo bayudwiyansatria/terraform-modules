@@ -4,10 +4,7 @@ variable "organization_id" {
   description = "MongoDB Atlas Organization ID"
 }
 
-variable "team" {
-  type = set(object({
-    name   = string
-    member = list(string)
-  }))
+variable "teams" {
+  type        = list(any)
   description = "MongoDB Access Team Name"
 }
