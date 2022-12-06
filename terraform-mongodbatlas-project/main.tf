@@ -1,9 +1,5 @@
-locals {
-  project = {for k, v in var.projects : v.name => v }
-}
-
 resource "mongodbatlas_project" "project" {
-  for_each = local.project
+  for_each = toset(var.projects)
   org_id   = var.organization_id
   name     = each.key
 

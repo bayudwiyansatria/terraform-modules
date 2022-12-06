@@ -1,7 +1,19 @@
+locals {
+  clusters = {
+    for tuple in setproduct(var.clusters, var.projects) : "${tuple[1]}-${tuple[0].name}" => {
+      project_id = tuple[1]
+      name       = tuple[0].name
+      size       = tuple[0].size
+      type       = tuple[0].type
+    }
+  }
+}
+
 resource "mongodbatlas_advanced_cluster" "cluster" {
-  project_id     = var.project_id
-  name           = var.name
-  cluster_type   = var.type
+  for_each       = local.clusters
+  project_id     = each.value.project_id
+  name           = each.value.name
+  cluster_type   = each.value.type
   backup_enabled = var.enable_backup
   pit_enabled    = false
 
@@ -11,17 +23,6 @@ resource "mongodbatlas_advanced_cluster" "cluster" {
       for_each = var.region_configs
       content {
 
-        dynamic auto_scaling {
-          for_each = var.auto_scaling_specs
-          content {
-            compute_enabled            = auto_scaling.value.compute_enabled
-            disk_gb_enabled            = auto_scaling.value.disk_gb_enabled
-            compute_scale_down_enabled = auto_scaling.value.compute_scale_down_enabled
-            compute_min_instance_size  = auto_scaling.value.compute_min_instance_size
-            compute_max_instance_size  = auto_scaling.value.compute_max_instance_size
-          }
-        }
-
         dynamic electable_specs {
           for_each = var.node_specs
           content {
@@ -30,14 +31,22 @@ resource "mongodbatlas_advanced_cluster" "cluster" {
         }
 
         dynamic analytics_specs {
-          for_each = var.node_specs
+          for_each = {
+            for k, v in var.node_specs :
+            k => v
+            if !contains(["M0", "M2", "M5"], v.instance_size)
+          }
           content {
             instance_size = analytics_specs.value.instance_size
           }
         }
 
         dynamic read_only_specs {
-          for_each = var.node_specs
+          for_each = {
+            for k, v in var.node_specs :
+            k => v
+            if !contains(["M0", "M2", "M5"], v.instance_size)
+          }
           content {
             instance_size = read_only_specs.value.instance_size
           }

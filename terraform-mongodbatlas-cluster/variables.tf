@@ -1,16 +1,14 @@
-variable "project_id" {
-  type        = string
-  description = "MongoDB Atlas ProjectId"
+variable "projects" {
+  type        = list(any)
+  description = "MongoDB Atlas Project Id"
 }
 
-variable "name" {
-  type        = string
-  description = "Name of MongoDB Cluster Name"
-}
-
-variable "type" {
-  type    = string
-  default = "REPLICASET" // Available REPLICASET, SHARDED or GEOSHARDED
+variable "clusters" {
+  type = set(object({
+    name = string
+    type = string // Available REPLICASET, SHARDED or GEOSHARDED
+    size = string
+  }))
 }
 
 variable "enable_backup" {
