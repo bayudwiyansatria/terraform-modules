@@ -1,16 +1,24 @@
 locals {
-  clusters = {
-    for tuple in setproduct(var.clusters, var.projects) : "${tuple[1]}-${tuple[0].name}" => {
-      project_id = tuple[1]
+  projects = flatten([
+    for project in data.mongodbatlas_project.project.* : [
+      for k, v in project : {
+        id   = k
+        name = v.name
+      }
+    ]
+  ])
+}
+
+resource "mongodbatlas_advanced_cluster" "cluster" {
+  for_each = {
+    for tuple in setproduct(var.clusters, local.projects) : "${tuple[1].name}-${tuple[0].name}"
+    => {
+      project_id = tuple[1].id
       name       = tuple[0].name
       size       = tuple[0].size
       type       = tuple[0].type
     }
   }
-}
-
-resource "mongodbatlas_advanced_cluster" "cluster" {
-  for_each       = local.clusters
   project_id     = each.value.project_id
   name           = each.value.name
   cluster_type   = each.value.type

@@ -1,16 +1,23 @@
 locals {
-  users = {
-    for tuple in setproduct(var.users, var.projects) : "${tuple[1]}-${tuple[0].username}" => {
-      project_id              = tuple[1]
+  projects = flatten([
+    for project in data.mongodbatlas_project.project.* : [
+      for k, v in project : {
+        id   = k
+        name = v.name
+      }
+    ]
+  ])
+}
+
+resource "mongodbatlas_database_user" "database_user" {
+  for_each = {
+    for tuple in setproduct(var.users, local.projects) : "${tuple[1].name}-${tuple[0].name}"=> {
+      project_id              = tuple[1].id
       username                = tuple[0].username
       password                = tuple[0].password
       authentication_database = tuple[0].authentication_database
     }
   }
-}
-
-resource "mongodbatlas_database_user" "database_user" {
-  for_each           = local.users
   username           = each.value.username
   password           = each.value.password
   project_id         = each.value.project_id
