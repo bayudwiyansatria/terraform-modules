@@ -11,6 +11,14 @@ resource "mongodbatlas_project" "project" {
     }
   }
 
+  dynamic "api_keys" {
+    for_each = var.api_keys
+    content {
+      api_key_id = api_keys.value.api_key_id
+      role_names = api_keys.value.role_names
+    }
+  }
+
   is_collect_database_specifics_statistics_enabled = true
   is_data_explorer_enabled                         = true
   is_performance_advisor_enabled                   = true
