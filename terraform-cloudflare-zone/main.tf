@@ -1,5 +1,9 @@
 resource "cloudflare_zone" "zone" {
-  for_each   = toset(var.domain)
+  for_each = {
+    for tuple in var.domain : replace(tuple, ".", "-") => {
+      zone = tuple
+    }
+  }
   account_id = var.account_id
-  zone       = each.key
+  zone       = each.value.zone
 }
