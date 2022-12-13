@@ -55,8 +55,12 @@ variable "subnet_delegation" {
           name   = "Microsoft.ContainerInstance/containerGroups"
           action = [
             "Microsoft.Network/virtualNetworks/subnets/join/action",
-            "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"
+            "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
           ]
+        },
+        {
+          name   = "Microsoft.ContainerService/AzureOverlayPreview"
+          action = []
         }
       ]
     }
