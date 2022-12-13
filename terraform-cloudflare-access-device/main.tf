@@ -1,19 +1,21 @@
+resource "cloudflare_device_settings_policy" "policy" {
+  account_id = var.account_id
+  name       = var.zone_id
+}
+
 resource "cloudflare_device_policy_certificates" "policy_certificate" {
   zone_id = var.zone_id
   enabled = var.enabled_certificate
-}
 
-resource "cloudflare_device_settings_policy" "policy" {
-  account_id = var.account_id
-  name       = cloudflare_device_policy_certificates.policy_certificate.id
   depends_on = [
-    cloudflare_device_policy_certificates.policy_certificate
+    cloudflare_device_settings_policy.policy
   ]
 }
 
+
 resource "cloudflare_device_posture_rule" "rule" {
   account_id = var.account_id
-  name       = cloudflare_device_policy_certificates.policy_certificate.id
+  name       = var.zone_id
   type       = var.rule
 
   dynamic "match" {
@@ -29,6 +31,7 @@ resource "cloudflare_device_posture_rule" "rule" {
       id = input.value
     }
   }
+
   depends_on = [
     cloudflare_device_policy_certificates.policy_certificate
   ]
@@ -37,7 +40,7 @@ resource "cloudflare_device_posture_rule" "rule" {
 resource "cloudflare_device_posture_integration" "integration" {
   count      = var.enabled_integration ? 1 : 0
   account_id = var.account_id
-  name       = cloudflare_device_policy_certificates.policy_certificate.id
+  name       = var.zone_id
   type       = var.integration_type
 
   dynamic config {
