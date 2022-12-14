@@ -111,7 +111,7 @@ variable "scale" {
   ]
 }
 
-variable "node_pool" {
+variable "system_pool" {
   type = set(object({
     name                   = string
     vm_size                = string
@@ -203,7 +203,7 @@ variable "node_pool" {
   }))
   default = [
     {
-      name                         = "default"
+      name                         = "system"
       vm_size                      = "Standard_D2_v2"
       # custom_ca_trust_enabled      = false
       enable_auto_scaling          = true
@@ -227,11 +227,157 @@ variable "node_pool" {
       pod_subnet_id                = null
       # scale_down_mode              = "ScaleDownModeDelete"
       node_taints                  = []
-      type                         = "VirtualMachineScaleSets"
       tags                         = {}
       ultra_ssd_enabled            = false
       upgrade_settings             = []
       vnet_subnet_id               = null
+      type                         = "VirtualMachineScaleSets"
+    }
+  ]
+}
+
+variable "node_pool" {
+  type = set(object({
+    name                   = string
+    vm_size                = string
+    # capacity_reservation_group_id = string
+    # custom_ca_trust_enabled = bool
+    enable_auto_scaling    = bool
+    max_count              = number
+    min_count              = number
+    node_count             = number
+    # workload_runtime        = string
+    zones                  = list(any)
+    enable_host_encryption = bool
+    enable_node_public_ip  = bool
+    kubelet                = set(object({
+      allowed_unsafe_sysctls    = string
+      container_log_max_line    = number
+      container_log_max_size_mb = string
+      cpu_cfs_quota_enabled     = bool
+      cpu_cfs_quota_period      = string
+      # Specifies the CPU Manager policy to use. Possible values are none and static
+      cpu_manager_policy        = string
+      image_gc_high_threshold   = number
+      image_gc_low_threshold    = number
+      pod_max_pid               = number
+      # Specifies the Topology Manager policy to use. Possible values are none, best-effort, restricted or single-numa-node
+      topology_manager_policy   = string
+    }))
+    linux = set(object({
+      swap_file_size_mb = number
+      sysctl_config     = set(object({
+        fs_aio_max_nr                      = number
+        fs_file_max                        = number
+        fs_inotify_max_user_watches        = number
+        fs_nr_open                         = number
+        kernel_threads_max                 = number
+        net_core_netdev_max_backlog        = number
+        net_core_optmem_max                = number
+        net_core_rmem_default              = number
+        net_core_rmem_max                  = number
+        net_core_somaxconn                 = number
+        net_core_wmem_default              = number
+        net_core_wmem_max                  = number
+        net_ipv4_ip_local_port_range_max   = number
+        net_ipv4_ip_local_port_range_min   = number
+        net_ipv4_neigh_default_gc_thresh1  = number
+        net_ipv4_neigh_default_gc_thresh2  = number
+        net_ipv4_neigh_default_gc_thresh3  = number
+        net_ipv4_tcp_fin_timeout           = number
+        net_ipv4_tcp_keepalive_intvl       = number
+        net_ipv4_tcp_keepalive_probes      = number
+        net_ipv4_tcp_keepalive_time        = number
+        net_ipv4_tcp_max_syn_backlog       = number
+        net_ipv4_tcp_max_tw_buckets        = number
+        net_ipv4_tcp_tw_reuse              = number
+        net_netfilter_nf_conntrack_buckets = number
+        net_netfilter_nf_conntrack_max     = number
+        vm_max_map_count                   = number
+        vm_swappiness                      = number
+        vm_vfs_cache_pressure              = number
+      }))
+      # specifies the defrag configuration for Transparent Huge Page. Possible values are always, defer, defer+madvise, madvise and never
+      transparent_huge_page_defrag  = string
+      # Specifies the Transparent Huge Page enabled configuration. Possible values are always, madvise and never
+      transparent_huge_page_enabled = string
+    }))
+    fips_enabled      = bool
+    # The type of disk used by kubelet. Possible values are OS and Temporary
+    kubelet_disk_type = string
+    max_pods          = number
+    node_labels       = map(any)
+    os_disk_size_gb   = number
+    # The type of disk which should be used for the Operating System. Possible values are Ephemeral and Managed
+    os_disk_type      = string
+    # Specifies the OS SKU used by the agent pool. Possible values include: Ubuntu, CBLMariner, Mariner, Windows2019, Windows2022
+    os_sku            = string
+    pod_subnet_id     = string
+    node_taints       = list(any)
+    # Specifies the autoscaling behaviour of the Kubernetes Cluster. If not specified, it defaults to 'ScaleDownModeDelete'. Possible values include 'ScaleDownModeDelete' and 'ScaleDownModeDeallocate'.
+    # scale_down_mode              = string
+    tags              = map(any)
+    ultra_ssd_enabled = bool
+    upgrade_settings  = set(object({
+      max_surge = string
+    }))
+    vnet_subnet_id  = string
+    #-------------------------------------------------------------------------------------------------------------------
+    # Available only on Resources. Ref: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
+    #-------------------------------------------------------------------------------------------------------------------
+    # The Eviction Policy which should be used for Virtual Machines within the Virtual Machine Scale Set powering this Node Pool. Possible values are Deallocate and Delete.
+    # An Eviction Policy can only be configured when priority is set to Spot and will default to Delete unless otherwise specified.
+    eviction_policy = string
+
+    # The fully qualified resource ID of the Dedicated Host Group to provision virtual machines from.
+    host_group_id  = string
+    # Should this Node Pool be used for System or User resources? Possible values are System and User
+    mode           = string
+    # The Priority for Virtual Machines within the Virtual Machine Scale Set that powers this Node Pool. Possible values are Regular and Spot
+    priority       = string
+    # The maximum price you're willing to pay in USD per Virtual Machine. Valid values are -1 (the current on-demand price for a Virtual Machine) or a positive value with up to five decimal places. Changing this forces a new resource to be created.
+    spot_max_price = number
+    # The Operating System which should be used for this Node Pool. Changing this forces a new resource to be created. Possible values are Linux and Windows
+    os_type        = string
+  }))
+  default = [
+    {
+      name                   = "system"
+      vm_size                = "Standard_D2_v2"
+      # custom_ca_trust_enabled      = false
+      enable_auto_scaling    = true
+      max_count              = 1
+      min_count              = 1
+      node_count             = 0
+      # workload_runtime             = "OCIContainer"
+      zones                  = []
+      enable_host_encryption = false
+      enable_node_public_ip  = false
+      kubelet                = []
+      linux                  = []
+      fips_enabled           = false
+      kubelet_disk_type      = "OS"
+      max_pods               = 110
+      node_labels            = {}
+      os_disk_size_gb        = 128
+      os_disk_type           = "Managed"
+      os_sku                 = "Ubuntu"
+      pod_subnet_id          = null
+      # scale_down_mode              = "ScaleDownModeDelete"
+      node_taints            = []
+      tags                   = {}
+      ultra_ssd_enabled      = false
+      upgrade_settings       = []
+      vnet_subnet_id         = null
+      #-------------------------------------------------------------------------------------------------------------------
+      # Available only on Resources. Ref: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
+      #-------------------------------------------------------------------------------------------------------------------
+      eviction_policy        = "Delete"
+      host_group_id          = null
+      mode                   = "User"
+      priority               = "Spot"
+      spot_max_price         = -1
+      os_type                = "Linux"
     }
   ]
 }
