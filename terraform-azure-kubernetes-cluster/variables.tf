@@ -19,10 +19,22 @@ variable "cluster_private_enabled" {
   default = false
 }
 
+variable "cluster_http_application_routing_enabled" {
+  type        = bool
+  description = "Http Routing"
+  default     = false
+}
+
 variable "cluster_rbac" {
   type        = bool
   description = "Whether Role Based Access Control for the Kubernetes Cluster should be enabled."
   default     = true
+}
+
+variable "cluster_local_account_disabled" {
+  type        = bool
+  description = "If true local accounts will be disabled."
+  default     = false
 }
 
 variable "cluster_run_command" {
@@ -435,6 +447,14 @@ variable "proxy" {
     http_proxy  = string
     https_proxy = string
     no_proxy    = list(string)
+  }))
+  default = []
+}
+
+variable "vault" {
+  type = set(object({
+    secret_rotation_enabled  = bool
+    secret_rotation_interval = string
   }))
   default = []
 }

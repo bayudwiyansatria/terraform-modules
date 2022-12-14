@@ -13,6 +13,16 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   # run_command_enabled               = var.cluster_run_command
   private_cluster_enabled           = var.cluster_private_enabled
   tags                              = var.cluster_tags
+  http_application_routing_enabled  = var.cluster_http_application_routing_enabled
+  local_account_disabled            = var.cluster_local_account_disabled
+
+  dynamic "key_vault_secrets_provider" {
+    for_each = var.vault
+    content {
+      secret_rotation_enabled  = key_vault_secrets_provider.value.secret_rotation_enabled
+      secret_rotation_interval = key_vault_secrets_provider.value.secret_rotation_interval
+    }
+  }
 
   dynamic "aci_connector_linux" {
     for_each = var.network_connector
@@ -154,11 +164,12 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     }
   }
 
-
+  # No more than 1 "identity" blocks are allowed
   dynamic identity {
     for_each = var.identity
     content {
-      type = identity.value.type
+      type         = identity.value.type
+      identity_ids = identity.value.identity_ids
     }
   }
 

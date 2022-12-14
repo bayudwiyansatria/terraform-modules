@@ -6,6 +6,7 @@ resource "azurerm_application_gateway" "network" {
   enable_http2                      = var.enable_http2
   force_firewall_policy_association = var.force_firewall_policy_association
   firewall_policy_id                = var.firewall_policy_id
+  tags                              = var.tags
 
   dynamic "backend_address_pool" {
     for_each = var.backend_address_pool

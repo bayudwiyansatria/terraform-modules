@@ -79,6 +79,7 @@ variable "frontend_ip_configuration" {
     # The name of the private link configuration to use for this frontend IP configuration.
     private_link_configuration_name = string
   }))
+  default = []
 }
 
 variable "frontend_port" {
@@ -177,6 +178,7 @@ variable "private_link_configuration" {
       private_ip_address            = string
     }))
   }))
+  default = []
 }
 
 variable "request_routing_rule" {
@@ -195,6 +197,7 @@ variable "request_routing_rule" {
     url_path_map_name           = string
     priority                    = number
   }))
+  default = []
 }
 
 variable "sku" {
