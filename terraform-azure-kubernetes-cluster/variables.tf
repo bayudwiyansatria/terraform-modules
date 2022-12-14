@@ -14,22 +14,115 @@ variable "cluster_version" {
   default     = "1.24"
 }
 
-variable "cluster_network_provider" {
+variable "cluster_private_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "cluster_rbac" {
+  type        = bool
+  description = "Whether Role Based Access Control for the Kubernetes Cluster should be enabled."
+  default     = true
+}
+
+variable "cluster_run_command" {
+  type        = bool
+  description = "Whether to enable run command for the cluster or not."
+  default     = true
+}
+
+variable "cluster_sku" {
   type        = string
-  description = "If network_profile is not defined, kubenet profile will be used by default."
-  default     = "network_profile"
+  description = "The SKU Tier that should be used for this Kubernetes Cluster. Possible values are Free and Paid (which includes the Uptime SLA)."
+  default     = "Free"
+}
+
+variable "cluster_kubelet" {
+  type = set(object({
+    client_id                 = string
+    object_id                 = string
+    user_assigned_identity_id = string
+  }))
+  default = []
+}
+
+variable "cluster_tags" {
+  type    = map(any)
+  default = {}
+}
+
+variable "ad_connector" {
+  type = set(object({
+    managed                = bool
+    tenant_id              = string
+    admin_group_object_ids = list(string)
+    azure_rbac_enabled     = bool
+  }))
+  default = []
 }
 
 variable "dns_prefix" {
   description = "DNS prefix specified when creating the managed cluster. Changing this forces a new resource to be created."
 }
 
+variable "scale" {
+  type = set(object({
+    balance_similar_node_groups      = bool
+    # Expander to use. Possible values are least-waste, priority, most-pods and random
+    expander                         = string
+    max_graceful_termination_sec     = number
+    max_node_provisioning_time       = string
+    max_unready_nodes                = number
+    max_unready_percentage           = number
+    new_pod_scale_up_delay           = string
+    scale_down_delay_after_add       = string
+    scale_down_delay_after_delete    = string
+    scale_down_delay_after_failure   = string
+    scan_interval                    = string
+    scale_down_unneeded              = string
+    scale_down_unready               = string
+    scale_down_utilization_threshold = number
+    empty_bulk_delete_max            = number
+    # If true cluster autoscaler will never delete nodes with pods with local storage, for example, EmptyDir or HostPath
+    skip_nodes_with_local_storage    = bool
+    # If true cluster autoscaler will never delete nodes with pods from kube-system (except for DaemonSet or mirror pods)
+    skip_nodes_with_system_pods      = bool
+  }))
+  default = [
+    {
+      balance_similar_node_groups      = false
+      expander                         = "random"
+      max_graceful_termination_sec     = 600
+      max_node_provisioning_time       = "15m"
+      max_unready_nodes                = 3
+      max_unready_percentage           = 45
+      new_pod_scale_up_delay           = "10s"
+      scale_down_delay_after_add       = "10m"
+      scale_down_delay_after_delete    = "10s"
+      scale_down_delay_after_failure   = "3m"
+      scan_interval                    = "10s"
+      scale_down_unneeded              = "10m"
+      scale_down_unready               = "20m"
+      scale_down_utilization_threshold = 0.5
+      empty_bulk_delete_max            = 10
+      skip_nodes_with_local_storage    = true
+      skip_nodes_with_system_pods      = true
+    }
+  ]
+}
 
 variable "node_pool" {
   type = set(object({
     name                   = string
     vm_size                = string
+    # capacity_reservation_group_id = string
+    # custom_ca_trust_enabled = bool
     enable_auto_scaling    = bool
+    max_count              = number
+    min_count              = number
+    node_count             = number
+    # workload_runtime        = string
+    zones                  = list(any)
     enable_host_encryption = bool
     enable_node_public_ip  = bool
     kubelet                = set(object({
@@ -46,31 +139,115 @@ variable "node_pool" {
       # Specifies the Topology Manager policy to use. Possible values are none, best-effort, restricted or single-numa-node
       topology_manager_policy   = string
     }))
+    linux = set(object({
+      swap_file_size_mb = number
+      sysctl_config     = set(object({
+        fs_aio_max_nr                      = number
+        fs_file_max                        = number
+        fs_inotify_max_user_watches        = number
+        fs_nr_open                         = number
+        kernel_threads_max                 = number
+        net_core_netdev_max_backlog        = number
+        net_core_optmem_max                = number
+        net_core_rmem_default              = number
+        net_core_rmem_max                  = number
+        net_core_somaxconn                 = number
+        net_core_wmem_default              = number
+        net_core_wmem_max                  = number
+        net_ipv4_ip_local_port_range_max   = number
+        net_ipv4_ip_local_port_range_min   = number
+        net_ipv4_neigh_default_gc_thresh1  = number
+        net_ipv4_neigh_default_gc_thresh2  = number
+        net_ipv4_neigh_default_gc_thresh3  = number
+        net_ipv4_tcp_fin_timeout           = number
+        net_ipv4_tcp_keepalive_intvl       = number
+        net_ipv4_tcp_keepalive_probes      = number
+        net_ipv4_tcp_keepalive_time        = number
+        net_ipv4_tcp_max_syn_backlog       = number
+        net_ipv4_tcp_max_tw_buckets        = number
+        net_ipv4_tcp_tw_reuse              = number
+        net_netfilter_nf_conntrack_buckets = number
+        net_netfilter_nf_conntrack_max     = number
+        vm_max_map_count                   = number
+        vm_swappiness                      = number
+        vm_vfs_cache_pressure              = number
+      }))
+      # specifies the defrag configuration for Transparent Huge Page. Possible values are always, defer, defer+madvise, madvise and never
+      transparent_huge_page_defrag  = string
+      # Specifies the Transparent Huge Page enabled configuration. Possible values are always, madvise and never
+      transparent_huge_page_enabled = string
+    }))
+    fips_enabled                 = bool
+    # The type of disk used by kubelet. Possible values are OS and Temporary
+    kubelet_disk_type            = string
+    max_pods                     = number
+    node_labels                  = map(any)
+    only_critical_addons_enabled = bool
+    os_disk_size_gb              = number
+    # The type of disk which should be used for the Operating System. Possible values are Ephemeral and Managed
+    os_disk_type                 = string
+    # Specifies the OS SKU used by the agent pool. Possible values include: Ubuntu, CBLMariner, Mariner, Windows2019, Windows2022
+    os_sku                       = string
+    pod_subnet_id                = string
+    node_taints                  = list(any)
+    # Specifies the autoscaling behaviour of the Kubernetes Cluster. If not specified, it defaults to 'ScaleDownModeDelete'. Possible values include 'ScaleDownModeDelete' and 'ScaleDownModeDeallocate'.
+    # scale_down_mode              = string
+    # The type of Node Pool which should be created. Possible values are AvailabilitySet and VirtualMachineScaleSets
+    type                         = string
+    tags                         = map(any)
+    ultra_ssd_enabled            = bool
+    upgrade_settings             = set(object({
+      max_surge = string
+    }))
+    vnet_subnet_id = string
   }))
   default = [
     {
-      name                   = "default"
-      vm_size                = "Standard_D2_v2"
-      enable_auto_scaling    = false
-      enable_host_encryption = false
-      enable_node_public_ip  = false
-      kubelet                = []
+      name                         = "default"
+      vm_size                      = "Standard_D2_v2"
+      # custom_ca_trust_enabled      = false
+      enable_auto_scaling          = true
+      max_count                    = 1
+      min_count                    = 1
+      node_count                   = 0
+      # workload_runtime             = "OCIContainer"
+      zones                        = []
+      enable_host_encryption       = false
+      enable_node_public_ip        = false
+      kubelet                      = []
+      linux                        = []
+      fips_enabled                 = false
+      kubelet_disk_type            = "OS"
+      max_pods                     = 110
+      node_labels                  = {}
+      only_critical_addons_enabled = false
+      os_disk_size_gb              = 128
+      os_disk_type                 = "Managed"
+      os_sku                       = "Ubuntu"
+      pod_subnet_id                = null
+      # scale_down_mode              = "ScaleDownModeDelete"
+      node_taints                  = []
+      type                         = "VirtualMachineScaleSets"
+      tags                         = {}
+      ultra_ssd_enabled            = false
+      upgrade_settings             = []
+      vnet_subnet_id               = null
     }
   ]
 }
 
 variable "network" {
   type = set(object({
+    dns_service_ip     = string
+    docker_bridge_cidr = string
+    service_cidr       = string
     # When network_plugin is set to azure - the vnet_subnet_id field in the default_node_pool block must be set and pod_cidr must not be set.
-    network_plugin    = string
-    # network_mode can only be set to bridge for existing Kubernetes Clusters and cannot be used to provision new Clusters - this will be removed by Azure in the future.
-    network_mode      = string
-    network_policy    = string
-    outbound_type     = string
-    load_balancer_sku = string
-    load_balancer     = set(object({
+    network_plugin     = string
+    network_policy     = string
+    outbound_type      = string
+    load_balancer_sku  = string
+    load_balancer      = set(object({
       idle_timeout_in_minutes  = number
-      effective_outbound_ips   = list(string)
       outbound_ip_prefix_ids   = list(string)
       outbound_ports_allocated = number
     }))
@@ -81,15 +258,16 @@ variable "network" {
   }))
   default = [
     {
-      network_plugin    = "azure"
-      network_mode      = "bridge"
-      network_policy    = "azure"
-      outbound_type     = "loadBalancer"
-      load_balancer_sku = "standard"
-      load_balancer     = [
+      dns_service_ip     = "10.1.0.10"
+      docker_bridge_cidr = "172.17.0.1/16"
+      service_cidr       = "10.1.0.0/16"
+      network_plugin     = "azure"
+      network_policy     = "azure"
+      outbound_type      = "loadBalancer"
+      load_balancer_sku  = "standard"
+      load_balancer      = [
         {
           idle_timeout_in_minutes  = 30
-          effective_outbound_ips   = []
           outbound_ip_prefix_ids   = []
           outbound_ports_allocated = 0
         }
@@ -99,13 +277,59 @@ variable "network" {
   ]
 }
 
-variable "identity" {
+variable "network_connector" {
   type = set(object({
-    type = string
+    subnet_name = string
+  }))
+  default = []
+}
+
+variable "proxy" {
+  type = set(object({
+    http_proxy  = string
+    https_proxy = string
+    no_proxy    = list(string)
+  }))
+  default = []
+}
+
+variable "storage" {
+  type = set(object({
+    blob_driver_enabled         = bool
+    disk_driver_enabled         = bool
+    disk_driver_version         = string
+    file_driver_enabled         = bool
+    snapshot_controller_enabled = bool
   }))
   default = [
     {
-      type = "SystemAssigned"
+      blob_driver_enabled         = false
+      disk_driver_enabled         = true
+      disk_driver_version         = "v1"
+      file_driver_enabled         = true
+      snapshot_controller_enabled = true
     }
   ]
+}
+
+variable "identity" {
+  type = set(object({
+    type         = string
+    identity_ids = list(string)
+  }))
+  default = [
+    {
+      type         = "SystemAssigned"
+      identity_ids = []
+    }
+  ]
+}
+
+variable "windows" {
+  type = set(object({
+    admin_username = string
+    admin_password = string
+    license        = string
+  }))
+  default = []
 }
