@@ -3,20 +3,78 @@ variable "resource_group_name" {
   description = "The name of the resource group in which to the Application Gateway should exist."
 }
 
+variable "ddos_plan_enabled" {
+  type    = bool
+  default = false
+}
+
 variable "name" {
-  type        = set(string)
+  type        = string
   description = "The name of the Application Gateway. Changing this forces a new resource to be created."
+}
+
+variable "sku" {
+  type = set(object({
+    # The Name of the SKU to use for this Application Gateway. Possible values are Standard_Small, Standard_Medium, Standard_Large, Standard_v2, WAF_Medium, WAF_Large, and WAF_v2.
+    name     = string
+    # The Tier of the SKU to use for this Application Gateway. Possible values are Standard, Standard_v2, WAF and WAF_v2.
+    tier     = string
+    # The Capacity of the SKU to use for this Application Gateway. When using a V1 SKU this value must be between 1 and 32, and 1 to 125 for a V2 SKU. This property is optional if autoscale_configuration is set.
+    capacity = number
+  }))
+  default = [
+    {
+      name     = "Standard_v2"
+      tier     = "Standard_v2"
+      capacity = null
+    }
+  ]
+}
+
+variable "gateway_ip_configuration" {
+  type = set(object({
+    name      = string
+    subnet_id = string
+  }))
+}
+
+variable "frontend_ip_configuration" {
+  type = set(object({
+    subnet_id                     = string
+    private_ip_address            = string
+    # The ID of a Public IP Address which the Application Gateway should use. The allocation method for the Public IP Address depends on the sku of this Application Gateway.
+    #    public_ip_address_id            = string
+    # The Allocation Method for the Private IP Address. Possible values are Dynamic and Static.
+    private_ip_address_allocation = string
+  }))
+  default = [
+    {
+      subnet_id                     = null
+      private_ip_address            = null
+      # public_ip_address_id            = null
+      private_ip_address_allocation = "Dynamic"
+    }
+  ]
+}
+
+variable "frontend_port" {
+  type = set(object({
+    port = number
+  }))
+  default = [
+    {
+      port = 80
+    }
+  ]
 }
 
 variable "backend_address_pool" {
   type = set(object({
-    name         = string
     fqdns        = list(string)
     ip_addresses = list(string)
   }))
   default = [
     {
-      name         = "default"
       fqdns        = []
       ip_addresses = []
     }
@@ -31,17 +89,15 @@ variable "backend_http_settings" {
     #  Is Cookie-Based Affinity enabled? Possible values are Enabled and Disabled.
     cookie_based_affinity               = string
     affinity_cookie_name                = string
-    name                                = string
     path                                = string
-    port                                = string
-    probe_name                          = string
+    port                                = number
     # The Protocol which should be used. Possible values are Http and Https.
     protocol                            = string
     request_timeout                     = number
     # (Optional) Host header to be sent to the backend servers. Cannot be set if pick_host_name_from_backend_address is set to true.
     host_name                           = string
     # (Optional) Whether host header should be picked from the host name of the backend server
-    pick_host_name_from_backend_address = string
+    pick_host_name_from_backend_address = bool
     trusted_root_certificate_names      = list(string)
     connection_draining                 = set(object({
       enabled           = bool
@@ -52,11 +108,9 @@ variable "backend_http_settings" {
     {
       authentication_certificate          = []
       cookie_based_affinity               = "Disabled"
-      affinity_cookie_name                = ""
-      name                                = ""
+      affinity_cookie_name                = "default"
       path                                = ""
-      port                                = ""
-      probe_name                          = ""
+      port                                = 80
       protocol                            = "Http"
       request_timeout                     = 30
       host_name                           = null
@@ -67,50 +121,9 @@ variable "backend_http_settings" {
   ]
 }
 
-variable "frontend_ip_configuration" {
-  type = set(object({
-    name                            = string
-    subnet_id                       = string
-    private_ip_address              = string
-    # The ID of a Public IP Address which the Application Gateway should use. The allocation method for the Public IP Address depends on the sku of this Application Gateway.
-    public_ip_address_id            = string
-    # The Allocation Method for the Private IP Address. Possible values are Dynamic and Static.
-    private_ip_address_allocation   = string
-    # The name of the private link configuration to use for this frontend IP configuration.
-    private_link_configuration_name = string
-  }))
-  default = []
-}
-
-variable "frontend_port" {
-  type = set(object({
-    name = string
-    port = number
-  }))
-  default = [
-    {
-      name = "default"
-      port = 80
-    }
-  ]
-}
-
-variable "gateway_ip_configuration" {
-  type = set(object({
-    name      = string
-    subnet_id = string
-  }))
-  default = [
-    {
-      name      = "default"
-      subnet_id = null
-    }
-  ]
-}
-
 variable "http_listener" {
   type = set(object({
-    name                           = string
+    #    name                           = string
     frontend_ip_configuration_name = string
     frontend_port_name             = string
     host_name                      = string
@@ -119,21 +132,24 @@ variable "http_listener" {
     protocol                       = string
     require_sni                    = string
     ssl_certificate_name           = string
-    custom_error_configuration     = string
-    firewall_policy_id             = string
-    ssl_profile_name               = string
+    custom_error_configuration     = set(object({
+      status_code           = string
+      custom_error_page_url = string
+    }))
+    firewall_policy_id = string
+    ssl_profile_name   = string
   }))
   default = [
     {
-      name                           = "default"
-      frontend_ip_configuration_name = null
-      frontend_port_name             = null
+      #      name                           = "default"
+      frontend_ip_configuration_name = "default"
+      frontend_port_name             = "Http"
       host_name                      = null
       host_names                     = ["*"]
       protocol                       = "Http"
       require_sni                    = null
       ssl_certificate_name           = null
-      custom_error_configuration     = null
+      custom_error_configuration     = []
       firewall_policy_id             = null
       ssl_profile_name               = null
     }
@@ -168,7 +184,6 @@ variable "identity" {
 
 variable "private_link_configuration" {
   type = set(object({
-    name             = string
     ip_configuration = set(object({
       name                          = string
       subnet_id                     = string
@@ -178,42 +193,22 @@ variable "private_link_configuration" {
       private_ip_address            = string
     }))
   }))
-  default = []
 }
 
 variable "request_routing_rule" {
   type = set(object({
-    name                        = string
     # The Type of Routing that should be used for this Rule. Possible values are Basic and PathBasedRouting.
-    rule_type                   = string
-    http_listener_name          = string
-    # The Name of the Backend Address Pool which should be used for this Routing Rule. Cannot be set if redirect_configuration_name is set.
-    backend_address_pool_name   = string
-    # The Name of the Backend HTTP Settings Collection which should be used for this Routing Rule. Cannot be set if redirect_configuration_name is set.
-    backend_http_settings_name  = string
-    # The Name of the Redirect Configuration which should be used for this Routing Rule. Cannot be set if either backend_address_pool_name or backend_http_settings_name is set.
-    redirect_configuration_name = string
-    rewrite_rule_set_name       = string
-    url_path_map_name           = string
-    priority                    = number
-  }))
-  default = []
-}
-
-variable "sku" {
-  type = set(object({
-    # The Name of the SKU to use for this Application Gateway. Possible values are Standard_Small, Standard_Medium, Standard_Large, Standard_v2, WAF_Medium, WAF_Large, and WAF_v2.
-    name     = string
-    # The Tier of the SKU to use for this Application Gateway. Possible values are Standard, Standard_v2, WAF and WAF_v2.
-    tier     = string
-    # The Capacity of the SKU to use for this Application Gateway. When using a V1 SKU this value must be between 1 and 32, and 1 to 125 for a V2 SKU. This property is optional if autoscale_configuration is set.
-    capacity = number
+    rule_type             = string
+    rewrite_rule_set_name = string
+    url_path_map_name     = string
+    priority              = number
   }))
   default = [
     {
-      name     = "Standard_Small"
-      tier     = "Standard"
-      capacity = null
+      rule_type             = "Basic"
+      rewrite_rule_set_name = null
+      url_path_map_name     = null
+      priority              = 1
     }
   ]
 }
@@ -304,7 +299,6 @@ variable "probe" {
     # The Hostname used for this Probe. If the Application Gateway is configured for a single site, by default the Host name should be specified as ‘127.0.0.1’, unless otherwise configured in custom probe. Cannot be set if pick_host_name_from_backend_http_settings is set to true.
     host                                      = string
     interval                                  = number
-    name                                      = string
     # The Protocol used for this Probe. Possible values are Http and Https.
     protocol                                  = string
     path                                      = string
@@ -318,7 +312,21 @@ variable "probe" {
     }))
     minimum_servers = number
   }))
-  default = []
+  default = [
+    {
+      host                                      = null
+      interval                                  = 1
+      # The Protocol used for this Probe. Possible values are Http and Https.
+      protocol                                  = "Http"
+      path                                      = "/"
+      timeout                                   = 1
+      unhealthy_threshold                       = 1
+      port                                      = 80
+      pick_host_name_from_backend_http_settings = true
+      match                                     = []
+      minimum_servers                           = 0
+    }
+  ]
 }
 
 variable "ssl_certificate" {
@@ -340,12 +348,8 @@ variable "tags" {
 
 variable "url_path_map" {
   type = set(object({
-    name                                = string
-    default_backend_address_pool_name   = string
-    default_backend_http_settings_name  = string
-    default_redirect_configuration_name = string
-    default_rewrite_rule_set_name       = string
-    path_rule                           = set(object({
+    name      = string
+    path_rule = set(object({
       name                        = string
       paths                       = list(string)
       backend_address_pool_name   = string
@@ -403,7 +407,6 @@ variable "firewall_policy_id" {
 
 variable "redirect_configuration" {
   type = set(object({
-    name                 = string
     # The type of redirect. Possible values are Permanent, Temporary, Found and SeeOther
     redirect_type        = string
     # One of target_listener_name or target_url
@@ -420,12 +423,16 @@ variable "autoscale_configuration" {
     min_capacity = number
     max_capacity = number
   }))
-  default = []
+  default = [
+    {
+      min_capacity = 0
+      max_capacity = 2
+    }
+  ]
 }
 
 variable "rewrite_rule_set" {
   type = set(object({
-    name         = string
     rewrite_rule = set(object({
       name          = string
       rule_sequence = number
@@ -447,10 +454,14 @@ variable "rewrite_rule_set" {
         path         = string
         query_string = string
         # The components used to rewrite the URL. Possible values are path_only and query_string_only to limit the rewrite to the URL Path or URL Query String only.
-        components   = string
+        #        components   = string
         reroute      = string
       }))
     }))
   }))
-  default = []
+  default = [
+    {
+      rewrite_rule = []
+    }
+  ]
 }

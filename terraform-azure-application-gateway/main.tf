@@ -1,4 +1,54 @@
-resource "azurerm_application_gateway" "network" {
+resource "azurerm_network_ddos_protection_plan" "plan" {
+  count               = var.ddos_plan_enabled ? 1 : 0
+  name                = var.name
+  resource_group_name = data.azurerm_resource_group.resource_group.name
+  location            = data.azurerm_resource_group.resource_group.location
+  tags                = {}
+}
+
+resource "azurerm_public_ip_prefix" "prefix" {
+  resource_group_name = data.azurerm_resource_group.resource_group.name
+  location            = data.azurerm_resource_group.resource_group.location
+  name                = var.name
+  sku                 = "Standard"
+  ip_version          = "IPv4"
+  prefix_length       = 31
+  tags                = {}
+  zones               = []
+}
+
+resource "azurerm_public_ip" "ip" {
+  resource_group_name     = data.azurerm_resource_group.resource_group.name
+  location                = data.azurerm_resource_group.resource_group.location
+  name                    = var.name
+  allocation_method       = "Static"
+  zones                   = azurerm_public_ip_prefix.prefix.zones
+  domain_name_label       = null
+  edge_zone               = null
+  idle_timeout_in_minutes = 30
+  ip_tags                 = {}
+  public_ip_prefix_id     = azurerm_public_ip_prefix.prefix.id
+  reverse_fqdn            = null
+  sku                     = azurerm_public_ip_prefix.prefix.sku
+  sku_tier                = "Regional"
+  tags                    = {}
+}
+
+locals {
+  backend_address_pool       = "${var.name}-backend-address-pool"
+  backend_http_settings      = "${var.name}-backend-http-settings"
+  frontend_ip_configuration  = "${var.name}-frontend-ip-configuration"
+  frontend_port              = "${var.name}-frontend-port"
+  http_listener              = "${var.name}-http-listener"
+  request_routing_rule       = "${var.name}-request-routing-rule"
+  redirect_configuration     = "${var.name}-redirect-configuration"
+  rewrite_rule_set           = "${var.name}-rewrite-rule-set"
+  url_path_map               = "${var.name}-url-path-map"
+  probe                      = "${var.name}-probe"
+  private_link_configuration = "${var.name}-private-link-configuration"
+}
+
+resource "azurerm_application_gateway" "gateway" {
   resource_group_name               = data.azurerm_resource_group.resource_group.name
   location                          = data.azurerm_resource_group.resource_group.location
   name                              = var.name
@@ -8,10 +58,47 @@ resource "azurerm_application_gateway" "network" {
   firewall_policy_id                = var.firewall_policy_id
   tags                              = var.tags
 
+  dynamic "sku" {
+    for_each = var.sku
+    content {
+      name     = sku.value.name
+      tier     = sku.value.tier
+      capacity = sku.value.capacity
+    }
+  }
+
+  dynamic "gateway_ip_configuration" {
+    for_each = var.gateway_ip_configuration
+    content {
+      name      = gateway_ip_configuration.value.name
+      subnet_id = gateway_ip_configuration.value.subnet_id
+    }
+  }
+
+  dynamic "frontend_ip_configuration" {
+    for_each = var.frontend_ip_configuration
+    content {
+      name                            = local.frontend_ip_configuration
+      subnet_id                       = frontend_ip_configuration.value.subnet_id
+      private_ip_address              = frontend_ip_configuration.value.private_ip_address
+      public_ip_address_id            = azurerm_public_ip.ip.id
+      private_ip_address_allocation   = frontend_ip_configuration.value.private_ip_address_allocation
+      private_link_configuration_name = local.private_link_configuration
+    }
+  }
+
+  dynamic "frontend_port" {
+    for_each = var.frontend_port
+    content {
+      name = local.frontend_port
+      port = frontend_port.value.port
+    }
+  }
+
   dynamic "backend_address_pool" {
     for_each = var.backend_address_pool
     content {
-      name         = backend_address_pool.value.name
+      name         = local.backend_address_pool
       fqdns        = backend_address_pool.value.fqdns
       ip_addresses = backend_address_pool.value.ip_addresses
     }
@@ -28,12 +115,12 @@ resource "azurerm_application_gateway" "network" {
         }
       }
 
+      name                                = local.backend_http_settings
       cookie_based_affinity               = backend_http_settings.value.cookie_based_affinity
       affinity_cookie_name                = backend_http_settings.value.affinity_cookie_name
-      name                                = backend_http_settings.value.name
       path                                = backend_http_settings.value.path
       port                                = backend_http_settings.value.port
-      probe_name                          = backend_http_settings.value.probe_name
+      probe_name                          = local.probe
       protocol                            = backend_http_settings.value.protocol
       request_timeout                     = backend_http_settings.value.request_timeout
       host_name                           = backend_http_settings.value.host_name
@@ -50,48 +137,28 @@ resource "azurerm_application_gateway" "network" {
     }
   }
 
-  dynamic "frontend_ip_configuration" {
-    for_each = var.frontend_ip_configuration
-    content {
-      name                            = frontend_ip_configuration.value.name
-      subnet_id                       = frontend_ip_configuration.value.subnet_id
-      private_ip_address              = frontend_ip_configuration.value.private_ip_address
-      public_ip_address_id            = frontend_ip_configuration.value.public_ip_address_id
-      private_ip_address_allocation   = frontend_ip_configuration.value.private_ip_address_allocation
-      private_link_configuration_name = frontend_ip_configuration.value.private_link_configuration_name
-    }
-  }
-
-  dynamic "frontend_port" {
-    for_each = var.frontend_port
-    content {
-      name = frontend_port.value.name
-      port = frontend_port.value.port
-    }
-  }
-
-  dynamic "gateway_ip_configuration" {
-    for_each = var.gateway_ip_configuration
-    content {
-      name      = gateway_ip_configuration.value.name
-      subnet_id = gateway_ip_configuration.value.subnet_id
-    }
-  }
-
   dynamic "http_listener" {
     for_each = var.http_listener
     content {
-      name                           = http_listener.value.name
-      frontend_ip_configuration_name = http_listener.value.frontend_ip_configuration_name
-      frontend_port_name             = http_listener.value.frontend_port_name
+      name                           = local.http_listener
+      frontend_ip_configuration_name = local.frontend_ip_configuration
+      frontend_port_name             = local.frontend_port
       host_name                      = http_listener.value.host_name
       host_names                     = http_listener.value.host_names
       protocol                       = http_listener.value.protocol
       require_sni                    = http_listener.value.require_sni
       ssl_certificate_name           = http_listener.value.ssl_certificate_name
-      custom_error_configuration     = http_listener.value.custom_error_configuration
-      firewall_policy_id             = http_listener.value.firewall_policy_id
-      ssl_profile_name               = http_listener.value.ssl_profile_name
+
+      dynamic "custom_error_configuration" {
+        for_each = toset(http_listener.value.custom_error_configuration)
+        content {
+          custom_error_page_url = custom_error_configuration.value.custom_error_page_url
+          status_code           = custom_error_configuration.value.status_code
+        }
+      }
+
+      firewall_policy_id = http_listener.value.firewall_policy_id
+      ssl_profile_name   = http_listener.value.ssl_profile_name
     }
   }
 
@@ -108,8 +175,7 @@ resource "azurerm_application_gateway" "network" {
   dynamic "private_link_configuration" {
     for_each = var.private_link_configuration
     content {
-      name = private_link_configuration.value.name
-
+      name = local.private_link_configuration
       dynamic "ip_configuration" {
         for_each = private_link_configuration.value.ip_configuration
         content {
@@ -126,24 +192,15 @@ resource "azurerm_application_gateway" "network" {
   dynamic "request_routing_rule" {
     for_each = var.request_routing_rule
     content {
-      name                        = request_routing_rule.value.name
-      rule_type                   = request_routing_rule.value.rule_type
-      http_listener_name          = request_routing_rule.value.http_listener_name
-      backend_address_pool_name   = request_routing_rule.value.backend_address_pool_name
-      backend_http_settings_name  = request_routing_rule.value.backend_http_settings_name
-      redirect_configuration_name = request_routing_rule.value.redirect_configuration_name
-      rewrite_rule_set_name       = request_routing_rule.value.rewrite_rule_set_name
-      url_path_map_name           = request_routing_rule.value.url_path_map_name
-      priority                    = request_routing_rule.value.priority
-    }
-  }
-
-  dynamic "sku" {
-    for_each = var.sku
-    content {
-      name     = sku.value.name
-      tier     = sku.value.tier
-      capacity = sku.value.capacity
+      name                       = local.request_routing_rule
+      rule_type                  = request_routing_rule.value.rule_type
+      http_listener_name         = local.http_listener
+      backend_address_pool_name  = local.backend_address_pool
+      backend_http_settings_name = local.backend_http_settings
+      # redirect_configuration_name = local.redirect_configuration
+      rewrite_rule_set_name      = local.rewrite_rule_set
+      url_path_map_name          = local.url_path_map
+      priority                   = request_routing_rule.value.priority
     }
   }
 
@@ -209,9 +266,9 @@ resource "azurerm_application_gateway" "network" {
   dynamic "probe" {
     for_each = var.probe
     content {
+      name                                      = local.probe
       host                                      = probe.value.host
       interval                                  = probe.value.interval
-      name                                      = probe.value.name
       protocol                                  = probe.value.protocol
       path                                      = probe.value.path
       timeout                                   = probe.value.timeout
@@ -244,11 +301,11 @@ resource "azurerm_application_gateway" "network" {
   dynamic "url_path_map" {
     for_each = var.url_path_map
     content {
-      name                                = url_path_map.value.name
-      default_backend_address_pool_name   = url_path_map.value.default_backend_address_pool_name
-      default_backend_http_settings_name  = url_path_map.value.default_backend_http_settings_name
-      default_redirect_configuration_name = url_path_map.value.default_redirect_configuration_name
-      default_rewrite_rule_set_name       = url_path_map.value.default_rewrite_rule_set_name
+      name                                = local.url_path_map
+      default_backend_address_pool_name   = local.backend_address_pool
+      default_backend_http_settings_name  = local.backend_http_settings
+      default_redirect_configuration_name = local.redirect_configuration
+      default_rewrite_rule_set_name       = local.rewrite_rule_set
 
       dynamic "path_rule" {
         for_each = url_path_map.value.path_rule
@@ -257,7 +314,7 @@ resource "azurerm_application_gateway" "network" {
           paths                       = path_rule.value.paths
           backend_address_pool_name   = path_rule.value.backend_address_pool_name
           backend_http_settings_name  = path_rule.value.backend_http_settings_name
-          redirect_configuration_name = path_rule.value.redirect_configuration_name
+          redirect_configuration_name = path_rule.value.redirect_configuration
           rewrite_rule_set_name       = path_rule.value.rewrite_rule_set_name
           firewall_policy_id          = path_rule.value.firewall_policy_id
         }
@@ -307,7 +364,7 @@ resource "azurerm_application_gateway" "network" {
   dynamic redirect_configuration {
     for_each = var.redirect_configuration
     content {
-      name          = redirect_configuration.value.name
+      name          = local.redirect_configuration
       redirect_type = redirect_configuration.value.redirect_type
     }
   }
@@ -323,7 +380,7 @@ resource "azurerm_application_gateway" "network" {
   dynamic "rewrite_rule_set" {
     for_each = var.rewrite_rule_set
     content {
-      name = rewrite_rule_set.value.name
+      name = local.rewrite_rule_set
 
       dynamic "rewrite_rule" {
         for_each = rewrite_rule_set.value.rewrite_rule
@@ -362,7 +419,7 @@ resource "azurerm_application_gateway" "network" {
             content {
               path         = url.value.path
               query_string = url.value.query_string
-              components   = url.value.components
+              #              components   = url.value.components
               reroute      = url.value.reroute
             }
           }

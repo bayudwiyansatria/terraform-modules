@@ -13,7 +13,7 @@ resource "azurerm_virtual_network" "vnet" {
   }
 }
 
-resource "azurerm_virtual_network_dns_servers" "example" {
+resource "azurerm_virtual_network_dns_servers" "dns" {
   virtual_network_id = azurerm_virtual_network.vnet.id
   dns_servers        = var.dns_server
 
@@ -26,10 +26,14 @@ resource "azurerm_subnet" "subnet" {
   for_each = {
     for k, v in var.subnet : v.name => k
   }
-  name                 = "${azurerm_virtual_network.vnet.name}-${each.value.name}"
-  resource_group_name  = data.azurerm_resource_group.resource_group.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = each.value.address_prefix
+  name                                           = "${azurerm_virtual_network.vnet.name}-${each.value.name}"
+  resource_group_name                            = data.azurerm_resource_group.resource_group.name
+  virtual_network_name                           = azurerm_virtual_network.vnet.name
+  address_prefixes                               = each.value.address_prefix
+  enforce_private_link_endpoint_network_policies = each.value.enable_endpoint_policies
+  enforce_private_link_service_network_policies  = each.value.enable_service_policies
+  service_endpoints                              = each.value.service_endpoints
+  service_endpoint_policy_ids                    = length(each.value.service_endpoint_policy_ids) > 0 ? each.value.service_endpoint_policy_ids : null
 
   dynamic delegation {
     for_each = toset(each.value.subnet_delegation)

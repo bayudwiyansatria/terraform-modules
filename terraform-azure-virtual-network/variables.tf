@@ -23,9 +23,13 @@ variable "dns_server" {
 
 variable "subnet" {
   type = set(object({
-    name              = string
-    address_prefix    = list(string)
-    subnet_delegation = set(object({
+    name                        = string
+    address_prefix              = list(string)
+    enable_service_policies     = bool
+    enable_endpoint_policies    = bool
+    service_endpoints           = list(string)
+    service_endpoint_policy_ids = list(string)
+    subnet_delegation           = set(object({
       name               = string
       service_delegation = set(object({
         name   = string
@@ -39,7 +43,11 @@ variable "subnet" {
       address_prefix = [
         "192.168.0.0/24"
       ]
-      subnet_delegation = [
+      enable_service_policies     = false
+      enable_endpoint_policies    = false
+      service_endpoints           = []
+      service_endpoint_policy_ids = []
+      subnet_delegation           = [
         {
           name               = "delegation"
           service_delegation = [
