@@ -141,6 +141,7 @@ resource "azurerm_subnet_network_security_group_association" "associated" {
     for k, v in azurerm_subnet.subnet : k => {
       id = v.id
     }
+    if v.enforce_private_link_endpoint_network_policies && v.enforce_private_link_service_network_policies
   }
   subnet_id                 = each.value.id
   network_security_group_id = azurerm_network_security_group.security.id
