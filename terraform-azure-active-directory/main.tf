@@ -1,8 +1,7 @@
 resource "azuread_user" "user" {
   for_each = {
-    for k, v in var.users : v.user_principal_name => k
+    for k, v in toset(var.users) : v.user_principal_name => k
   }
-
   account_enabled             = each.value.account_enabled
   age_group                   = each.value.age_group
   business_phones             = each.value.business_phones

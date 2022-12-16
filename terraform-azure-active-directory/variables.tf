@@ -3,7 +3,7 @@ variable "users" {
     account_enabled             = bool
     # The age group of the user. Supported values are Adult, NotAdult and Minor. Omit this property or specify a blank string to unset.
     age_group                   = string
-    business_phones             = string
+    business_phones             = list(string)
     city                        = string
     company_name                = string
     # Whether consent has been obtained for minors. Supported values are Granted, Denied and NotRequired. Omit this property or specify a blank string to unset.
@@ -36,7 +36,7 @@ variable "users" {
     other_mails                 = list(string)
     # The password for the user. The password must satisfy minimum requirements as specified by the password policy. The maximum length is 256 characters. This property is required when creating a new user.
     password                    = any
-    postal_code                 = number
+    postal_code                 = string
     # The user's preferred language, in ISO 639-1 notation.
     preferred_language          = string
     # Whether or not the Outlook global address list should include this user. Defaults to true.
