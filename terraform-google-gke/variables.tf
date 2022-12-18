@@ -145,11 +145,11 @@ variable "description" {
   default     = null
 }
 
-#variable "default_max_pods_per_node" {
-#  type        = number
-#  description = "The default maximum number of pods per node in this cluster. This doesn't work on routes-based clusters, clusters that don't have IP Aliasing enabled. See the official documentation for more information."
-#  default     = 0
-#}
+variable "default_max_pods_per_node" {
+  type        = number
+  description = "The default maximum number of pods per node in this cluster. This doesn't work on routes-based clusters, clusters that don't have IP Aliasing enabled. See the official documentation for more information."
+  default     = 110
+}
 
 variable "enable_kubernetes_alpha" {
   type        = bool
@@ -169,11 +169,11 @@ variable "enable_legacy_abac" {
   default     = false
 }
 
-#variable "enable_shielded_nodes" {
-#  type        = bool
-#  description = "Enable Shielded Nodes features on all nodes in this cluster."
-#  default     = true
-#}
+variable "enable_shielded_nodes" {
+  type        = bool
+  description = "Enable Shielded Nodes features on all nodes in this cluster."
+  default     = true
+}
 
 variable "enable_autopilot" {
   type        = bool
@@ -201,7 +201,7 @@ variable "ip_allocation_policy" {
 variable "networking_mode" {
   type        = string
   description = "The logging service that the cluster should write logs to. Available options include logging.googleapis.com(Legacy Stackdriver), logging.googleapis.com/kubernetes(Stackdriver Kubernetes Engine Logging), and none. Defaults to logging.googleapis.com/kubernetes"
-  default     = "logging.googleapis.com/kubernetes"
+  default     = "VPC_NATIVE"
 }
 
 variable "logging_config" {

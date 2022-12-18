@@ -1,6 +1,26 @@
+variable "project" {
+  type        = string
+  description = "The ID of the project in which the resource belongs. If it is not provided, the provider project is used."
+}
+
 variable "region" {
   type        = string
   description = "The region the instance will sit in. If a region is not provided in the resource definition, the provider region will be used instead."
+}
+
+variable "name" {
+  type        = string
+  description = "The name of the instance. If the name is left blank, Terraform will randomly generate one when the instance is first created. This is done because after a name is used, it cannot be reused for up to one week."
+}
+
+variable "database_version" {
+  type        = string
+  description = "The MySQL, PostgreSQL or SQL Server version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6,POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. SQLSERVER_2019_STANDARD, SQLSERVER_2019_ENTERPRISE, SQLSERVER_2019_EXPRESS, SQLSERVER_2019_WEB"
+}
+
+variable "root_password" {
+  type        = string
+  description = "Initial root password. Required for MS SQL Server."
 }
 
 variable "settings" {
@@ -17,8 +37,8 @@ variable "settings" {
     pricing_plan          = string
     user_labels           = map(any)
     database_flags        = set(object({
-      name  = string
-      value = string
+      name  = any
+      value = any
     }))
     active_directory_config = set(object({
       domain = string
@@ -43,7 +63,7 @@ variable "settings" {
       location                       = string
       transaction_log_retention_days = number
       backup_retention_settings      = set(object({
-        retained_backups = any
+        retained_backups = number
         retention_unit   = string
       }))
     }))
@@ -87,39 +107,7 @@ variable "settings" {
 
   }))
   description = "The settings to use for the database. The configuration is detailed below"
-  default     = [
-    {
-      tier                    = "db-f1-micro"
-      activation_policy       = "ALWAYS"
-      availability_type       = "ZONAL"
-      collation               = null
-      connector_enforcement   = false
-      disk_autoresize         = true
-      disk_autoresize_limit   = 0
-      disk_size               = "10GB"
-      disk_type               = "PD_SSD"
-      pricing_plan            = "PER_USE"
-      user_labels             = {}
-      database_flags          = []
-      active_directory_config = []
-      deny_maintenance_period = []
-      backup_configuration    = []
-      ip_configuration        = []
-      location_preference     = []
-      maintenance_window      = []
-      insights_config         = []
-    }
-  ]
-}
-
-variable "database_version" {
-  type        = string
-  description = "The MySQL, PostgreSQL or SQL Server version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6,POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. SQLSERVER_2019_STANDARD, SQLSERVER_2019_ENTERPRISE, SQLSERVER_2019_EXPRESS, SQLSERVER_2019_WEB"
-}
-
-variable "name" {
-  type        = string
-  description = "The name of the instance. If the name is left blank, Terraform will randomly generate one when the instance is first created. This is done because after a name is used, it cannot be reused for up to one week."
+  default     = []
 }
 
 variable "maintenance_version" {
@@ -132,11 +120,6 @@ variable "master_instance_name" {
   type        = string
   description = "The name of the existing instance that will act as the master in the replication setup. Note, this requires the master to have binary_log_enabled set, as well as existing backups."
   default     = null
-}
-
-variable "project" {
-  type        = string
-  description = "The ID of the project in which the resource belongs. If it is not provided, the provider project is used."
 }
 
 variable "replica_configuration" {
@@ -155,11 +138,6 @@ variable "replica_configuration" {
   }))
   description = "The configuration for replication. The configuration is detailed below. Valid only for MySQL instances."
   default     = []
-}
-
-variable "root_password" {
-  type        = string
-  description = "Initial root password. Required for MS SQL Server."
 }
 
 variable "encryption_key_name" {
