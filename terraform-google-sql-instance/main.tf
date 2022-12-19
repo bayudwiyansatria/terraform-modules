@@ -4,7 +4,7 @@ resource "google_sql_database_instance" "main" {
   name                 = var.name
   master_instance_name = var.master_instance_name
   project              = var.project
-  root_password        = var.root_password
+  root_password        = length(regexall("MySQL_([0-9]+)", var.database_version)) > 0 ? var.root_password : null
   deletion_protection  = var.deletion_protection
 
   dynamic "settings" {
@@ -22,7 +22,9 @@ resource "google_sql_database_instance" "main" {
       user_labels           = settings.value.user_labels
 
       dynamic "database_flags" {
-        for_each = settings.value.database_flags
+        for_each = {
+          for k, v in settings.value.database_flags : v.name => k
+        }
         content {
           name  = database_flags.value.name
           value = database_flags.value.value
@@ -42,8 +44,9 @@ resource "google_sql_database_instance" "main" {
           binary_log_enabled             = backup_configuration.value.binary_log_enabled
           enabled                        = backup_configuration.value.enabled
           start_time                     = backup_configuration.value.start_time
+          location                       = backup_configuration.value.location
           transaction_log_retention_days = backup_configuration.value.transaction_log_retention_days
-
+          point_in_time_recovery_enabled = length(regexall("MySQL_([0-9]+)", var.database_version)) > 0 ? null : backup_configuration.value.point_in_time_recovery_enabled
           dynamic "backup_retention_settings" {
             for_each = backup_configuration.value.backup_retention_settings
             content {
@@ -63,7 +66,9 @@ resource "google_sql_database_instance" "main" {
           allocated_ip_range = ip_configuration.value.allocated_ip_range
 
           dynamic "authorized_networks" {
-            for_each = ip_configuration.value.authorized_networks
+            for_each = {
+              for k, v in ip_configuration.value.authorized_networks : v.name => k
+            }
             content {
               name            = authorized_networks.value.name
               value           = authorized_networks.value.value
@@ -103,7 +108,7 @@ resource "google_sql_database_instance" "main" {
   }
 
   dynamic "replica_configuration" {
-    for_each = var.replica_configuration
+    for_each = toset(length(regexall("MySQL_([0-9]+)", var.database_version)) > 0 ? var.replica_configuration : [])
     content {
       ca_certificate            = replica_configuration.value.ca_certificate
       client_certificate        = replica_configuration.value.client_certificate

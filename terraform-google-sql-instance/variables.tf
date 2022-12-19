@@ -59,7 +59,7 @@ variable "settings" {
       binary_log_enabled             = bool
       enabled                        = bool
       start_time                     = string
-      #      point_in_time_recovery_enabled = string
+      point_in_time_recovery_enabled = bool
       location                       = string
       transaction_log_retention_days = number
       backup_retention_settings      = set(object({
