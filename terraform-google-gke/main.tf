@@ -256,78 +256,6 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
-  #  dynamic "node_config" {
-  #    for_each = var.node_config
-  #    content {
-  #      disk_size_gb = number
-  #      disk_type    = string
-  #
-  #      dynamic "gcfs_config" {
-  #        for_each = node_config.value.gcfs_config
-  #        content {
-  #          enabled = gcfs_config.value.enabled
-  #        }
-  #      }
-  #
-  #      dynamic "gvnic" {
-  #        for_each = node_config.value.gvnic
-  #        content {
-  #          enabled = gvnic.value.enabled
-  #        }
-  #      }
-  #
-  #
-  #      dynamic "guest_accelerator" {
-  #        for_each = node_config.value.guest_accelerator
-  #        content {
-  #          type               = guest_accelerator.value.type
-  #          count              = guest_accelerator.value.count
-  #          gpu_partition_size = guest_accelerator.value.gpu_partition_size
-  #        }
-  #      }
-  #
-  #      image_type        = node_config.value.image_type
-  #      labels            = node_config.value.labels
-  #      local_ssd_count   = node_config.value.local_ssd_count
-  #      machine_type      = node_config.value.machine_type
-  #      metadata          = node_config.value.metadata
-  #      min_cpu_platform  = node_config.value.min_cpu_platform
-  #      oauth_scopes      = node_config.value.oauth_scopes
-  #      preemptible       = node_config.value.preemptible
-  #      spot              = node_config.value.preemptible.spot
-  #      boot_disk_kms_key = node_config.value.boot_disk_kms_key
-  #      service_account   = node_config.value.service_account
-  #
-  #      dynamic "shielded_instance_config" {
-  #        for_each = node_config.value.shielded_instance_config
-  #        content {
-  #          enable_secure_boot          = shielded_instance_config.value.enable_secure_boot
-  #          enable_integrity_monitoring = shielded_instance_config.value.enable_integrity_monitoring
-  #        }
-  #      }
-  #
-  #      tags = node_config.value.tags
-  #
-  #      dynamic "taint" {
-  #        for_each = node_config.value.taint
-  #        content {
-  #          key    = taint.value.key
-  #          value  = taint.value.value
-  #          effect = taint.value.effect
-  #        }
-  #      }
-  #
-  #      dynamic "workload_metadata_config" {
-  #        for_each = node_config.value.workload_metadata_config
-  #        content {
-  #          mode = workload_metadata_config.value.mode
-  #        }
-  #      }
-  #
-  #      node_group = node_config.value.node_group
-  #    }
-  #  }
-
   #  node_pool {}
 
   dynamic "confidential_nodes" {
@@ -413,9 +341,29 @@ resource "google_container_cluster" "cluster" {
 }
 
 resource "google_container_node_pool" "nodes" {
-  name       = var.name
-  cluster    = google_container_cluster.cluster.id
-  node_count = 1
+  for_each = {
+    for k, v in var.node_pool_auto_config : v.name => k
+  }
+  cluster            = google_container_cluster.cluster.id
+  location           = google_container_cluster.cluster.location
+  initial_node_count = each.value.node_count > 0 ? null : var.initial_node_count
+  max_pods_per_node  = var.default_max_pods_per_node
+  # node_locations     = []
+  name               = "${google_container_cluster.cluster.name}-${each.value.name}"
+  # name_prefix        = ""
+  node_count         = each.value.node_count
+  project            = google_container_cluster.cluster.project
+  version            = google_container_cluster.cluster.master_version
+
+  dynamic autoscaling {
+    for_each = toset(each.value.autoscaling)
+    content {
+      max_node_count       = autoscaling.value.max_node_count
+      min_node_count       = autoscaling.value.min_node_count
+      total_min_node_count = autoscaling.value.total_min_node_count
+      total_max_node_count = autoscaling.value.total_max_node_count
+    }
+  }
 
   dynamic "node_config" {
     for_each = var.node_config
@@ -487,6 +435,97 @@ resource "google_container_node_pool" "nodes" {
 
       node_group = node_config.value.node_group
     }
+  }
+
+  dynamic "management" {
+    for_each = toset(each.value.management)
+    content {
+      auto_repair  = management.value.auto_repair
+      auto_upgrade = management.value.auto_upgrade
+    }
+  }
+
+  dynamic "upgrade_settings" {
+    for_each = toset(each.value.upgrade_settings)
+    content {
+      max_surge       = upgrade_settings.value.max_surge
+      max_unavailable = upgrade_settings.value.max_unavailable
+    }
+  }
+
+  dynamic "node_config" {
+    for_each = toset(each.value.node_config)
+    content {
+      disk_size_gb = node_config.value.disk_size_gb
+      disk_type    = node_config.value.disk_type
+
+      dynamic "gcfs_config" {
+        for_each = toset(node_config.value.gcfs_config)
+        content {
+          enabled = gcfs_config.value.enabled
+        }
+      }
+
+      dynamic "gvnic" {
+        for_each = toset(node_config.value.gvnic)
+        content {
+          enabled = gvnic.value.enabled
+        }
+      }
+
+      dynamic "guest_accelerator" {
+        for_each = toset(node_config.value.guest_accelerator)
+        content {
+          type               = guest_accelerator.value.type
+          count              = guest_accelerator.value.count
+          gpu_partition_size = guest_accelerator.value.gpu_partition_size
+        }
+      }
+
+      image_type        = node_config.value.image_type
+      labels            = node_config.value.labels
+      local_ssd_count   = node_config.value.local_ssd_count
+      machine_type      = node_config.value.machine_type
+      metadata          = node_config.value.metadata
+      min_cpu_platform  = node_config.value.min_cpu_platform
+      oauth_scopes      = node_config.value.oauth_scopes
+      preemptible       = node_config.value.preemptible
+      spot              = node_config.value.spot
+      boot_disk_kms_key = node_config.value.boot_disk_kms_key
+      service_account   = node_config.value.service_account
+
+      dynamic "shielded_instance_config" {
+        for_each = toset(node_config.value.shielded_instance_config)
+        content {
+          enable_secure_boot          = shielded_instance_config.value.enable_secure_boot
+          enable_integrity_monitoring = shielded_instance_config.value.enable_integrity_monitoring
+        }
+      }
+
+      tags = node_config.value.tags
+
+      dynamic "taint" {
+        for_each = toset(node_config.value.taint)
+        content {
+          key    = taint.value.key
+          value  = taint.value.value
+          effect = taint.value.effect
+        }
+      }
+
+      dynamic "workload_metadata_config" {
+        for_each = toset(node_config.value.workload_metadata_config)
+        content {
+          mode = workload_metadata_config.value.mode
+        }
+      }
+
+      node_group = node_config.value.node_group
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 
   depends_on = [

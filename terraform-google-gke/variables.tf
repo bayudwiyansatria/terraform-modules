@@ -386,15 +386,130 @@ variable "node_pool" {
   default     = []
 }
 
-#variable "node_pool_auto_config" {
-#  type = set(object({
-#    network_tags = set(object({
-#      tags = set(string)
-#    }))
-#  }))
-#  description = "Node pool configs that apply to auto-provisioned node pools in autopilot clusters and node auto-provisioning-enabled clusters."
-#  default     = []
-#}
+variable "node_pool_auto_config" {
+  type = set(object({
+    name        = string
+    node_count  = number
+    autoscaling = set(object({
+      max_node_count       = number
+      min_node_count       = number
+      total_min_node_count = number
+      total_max_node_count = number
+    }))
+    management = set(object({
+      auto_repair  = bool
+      auto_upgrade = bool
+    }))
+    upgrade_settings = set(object({
+      max_surge       = number
+      max_unavailable = number
+    }))
+    node_config = set(object({
+      disk_size_gb = number
+      disk_type    = string
+      gcfs_config  = set(object({
+        enabled = bool
+      }))
+      gvnic = set(object({
+        enabled = bool
+      }))
+      guest_accelerator = set(object({
+        type               = string
+        count              = number
+        gpu_partition_size = string
+      }))
+      image_type               = string
+      labels                   = map(any)
+      local_ssd_count          = number
+      machine_type             = string
+      metadata                 = map(any)
+      min_cpu_platform         = string
+      oauth_scopes             = set(string)
+      preemptible              = bool
+      spot                     = bool
+      boot_disk_kms_key        = string
+      service_account          = string
+      shielded_instance_config = set(object({
+        enable_secure_boot          = bool
+        enable_integrity_monitoring = bool
+      }))
+      tags  = list(string)
+      taint = set(object({
+        key    = string
+        value  = string
+        # Effect for taint. Accepted values are NO_SCHEDULE, PREFER_NO_SCHEDULE, and NO_EXECUTE.
+        effect = string
+      }))
+      workload_metadata_config = set(object({
+        # MODE_UNSPECIFIED: Not Set
+        # GCE_METADATA: Expose all Compute Engine metadata to pods.
+        # GKE_METADATA: Run the GKE Metadata Server on this node. The GKE Metadata Server exposes a metadata API to workloads that is compatible with the V1 Compute Metadata APIs exposed by the Compute Engine and App Engine Metadata Servers. This feature can only be enabled if workload identity is enabled at the cluster level.
+        mode = string
+      }))
+      node_group = string
+    }))
+    #    network_tags = set(object({
+    #      tags = set(string)
+    #    }))
+  }))
+  description = "Node pool configs that apply to auto-provisioned node pools in autopilot clusters and node auto-provisioning-enabled clusters."
+  default     = [
+    {
+      name       = "default_node_pool"
+      node_count = 1
+      management = [
+        {
+          auto_repair  = true
+          auto_upgrade = true
+        }
+      ]
+      autoscaling      = []
+      upgrade_settings = [
+        {
+          max_surge       = 1
+          max_unavailable = 0
+        }
+      ]
+      node_config = [
+        {
+          disk_size_gb      = 100
+          disk_type         = "pd-balanced"
+          gcfs_config       = []
+          gvnic             = []
+          guest_accelerator = []
+          image_type        = "COS_CONTAINERD"
+          labels            = {}
+          local_ssd_count   = 0
+          machine_type      = "e2-medium"
+          metadata          = {}
+          min_cpu_platform  = null
+          oauth_scopes      = [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ]
+          preemptible              = false
+          spot                     = false
+          boot_disk_kms_key        = null
+          service_account          = null
+          shielded_instance_config = [
+            {
+              enable_integrity_monitoring = true
+              enable_secure_boot          = false
+            }
+          ]
+          tags                     = []
+          taint                    = []
+          workload_metadata_config = []
+          node_group               = null
+        }
+      ]
+    }
+  ]
+}
 
 #variable "node_pool_defaults" {
 #  type = set(object({
