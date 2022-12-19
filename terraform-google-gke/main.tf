@@ -347,7 +347,15 @@ resource "google_container_cluster" "cluster" {
   dynamic "private_cluster_config" {
     for_each = var.private_cluster_config
     content {
+      enable_private_nodes    = private_cluster_config.value.enable_private_nodes
       enable_private_endpoint = private_cluster_config.value.enable_private_endpoint
+
+      dynamic "master_global_access_config" {
+        for_each = private_cluster_config.value.master_ipv4_cidr_block
+        content {
+          enabled = master_global_access_config.value.enabled
+        }
+      }
     }
   }
 
