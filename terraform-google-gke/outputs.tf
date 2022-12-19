@@ -10,5 +10,14 @@ output "node_pool_id" {
 
 output "kube_config" {
   sensitive = true
-  value     = google_container_cluster.cluster.master_auth
+  value     = [
+    {
+      host                   = "https://${data.google_container_cluster.cluster.endpoint}"
+      token                  = data.google_client_config.provider.access_token
+      cluster_ca_certificate = data.google_container_cluster.cluster.master_auth.0.cluster_ca_certificate
+    }
+  ]
+  depends_on = [
+    data.google_container_cluster.cluster
+  ]
 }
