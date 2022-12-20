@@ -20,18 +20,24 @@ resource "kubernetes_secret" "registry" {
 }
 
 resource "kubernetes_secret" "secret_environment_variables" {
+  count = var.secret_environment_variables ? 1 : 0
   metadata {
     name = "${var.name}-environment"
   }
 
-  data = {for i in var.secret_environment_variables : i.key => i.value}
+  data = {
+    for i in toset(var.secret_environment_variables) : i.key => i.value
+  }
 }
 
 resource "kubernetes_config_map" "environment_variables" {
+  count = var.environment_variables ? 1 : 0
   metadata {
     name = "${var.name}-environment"
   }
-  data = {for i in var.environment_variables : i.key => i.value}
+  data = {
+    for i in toset(var.environment_variables) : i.key => i.value
+  }
 }
 
 
@@ -43,6 +49,10 @@ resource "kubernetes_service_account" "service_account" {
 
   secret {
     name = kubernetes_secret.registry[count.index].metadata.0.name
+  }
+
+  secret {
+    name = kubernetes_secret.secret_environment_variables.metadata.0.name
   }
 
   image_pull_secret {
@@ -109,6 +119,8 @@ resource "kubernetes_deployment" "apps" {
               protocol       = "TCP"
             }
           }
+
+          command = length(var.container.command) > 0 ?  var.container.command ? null
 
           args = var.container.args
         }

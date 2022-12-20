@@ -11,6 +11,7 @@ variable "container" {
     image             = string
     name              = string
     image_pull_policy = string
+    command           = list(string)
     args              = list(string)
   })
 }
