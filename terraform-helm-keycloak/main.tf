@@ -18,7 +18,7 @@ resource "helm_release" "keycloak" {
   name       = "keycloak"
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "keycloak"
-  version    = "7.1.12"
+  version    = "13.0.0"
 
   create_namespace = true
   namespace        = "keycloak"

@@ -1,5 +1,4 @@
 auth:
-  createAdminUser: true
   adminUser: root
   adminPassword: ""
   managementUser: manager
@@ -21,6 +20,7 @@ auth:
       requests: {}
 postgresql:
   auth:
+    postgresPassword: ""
     username: bn_keycloak
     password: ""
     database: bitnami_keycloak

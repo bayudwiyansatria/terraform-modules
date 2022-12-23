@@ -1,10 +1,14 @@
-resource "google_sql_database_instance" "main" {
+locals {
+  sql = length(regexall("MySQL_([0-9]+)", var.database_version)) > 0 ? true : false
+}
+
+resource "google_sql_database_instance" "instance" {
   region               = var.region
   database_version     = var.database_version
   name                 = var.name
   master_instance_name = var.master_instance_name
   project              = var.project
-  root_password        = length(regexall("MySQL_([0-9]+)", var.database_version)) > 0 ? var.root_password : null
+  root_password        = local.sql ? var.root_password : var.root_password
   deletion_protection  = var.deletion_protection
 
   dynamic "settings" {
@@ -62,7 +66,7 @@ resource "google_sql_database_instance" "main" {
         content {
           ipv4_enabled       = ip_configuration.value.ipv4_enabled
           private_network    = ip_configuration.value.private_network
-          require_ssl        = ip_configuration.value.ipv4_enabled
+          require_ssl        = ip_configuration.value.require_ssl
           allocated_ip_range = ip_configuration.value.allocated_ip_range
 
           dynamic "authorized_networks" {
@@ -144,22 +148,35 @@ resource "google_sql_database_instance" "main" {
 }
 
 resource "google_sql_database" "database" {
-  for_each        = toset(var.database)
+  for_each = {
+    for k, v in toset(var.database) : v.name => k
+  }
   name            = each.value.name
-  instance        = google_sql_database_instance.main.name
+  instance        = google_sql_database_instance.instance.name
   charset         = each.value.charset
   collation       = each.value.collation
-  project         = google_sql_database_instance.main.project
+  project         = google_sql_database_instance.instance.project
   deletion_policy = each.value.deletion_policy
+
+  depends_on = [
+    google_sql_database_instance.instance
+  ]
 }
 
 resource "google_sql_user" "users" {
-  for_each        = toset(var.users)
-  instance        = google_sql_database_instance.main.name
+  for_each = {
+    for k, v in toset(var.users) : v.name => k
+  }
+  instance        = google_sql_database_instance.instance.name
   name            = each.value.name
   password        = each.value.password
   type            = each.value.type
   deletion_policy = each.value.deletion_policy
   host            = each.value.host
-  project         = google_sql_database_instance.main.project
+  project         = google_sql_database_instance.instance.project
+
+  depends_on = [
+    google_sql_database.database,
+    google_sql_database_instance.instance
+  ]
 }

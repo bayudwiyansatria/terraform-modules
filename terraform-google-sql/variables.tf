@@ -184,7 +184,6 @@ variable "database" {
 }
 
 variable "users" {
-  sensitive = true
   type      = set(object({
     name            = string
     password        = string
