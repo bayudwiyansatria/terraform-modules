@@ -171,3 +171,36 @@ variable "clone" {
   description = "The context needed to create this instance as a clone of another instance. When this field is set during resource creation, Terraform will attempt to clone another instance as indicated in the context. The configuration is detailed below."
   default     = []
 }
+
+variable "database" {
+  type = set(object({
+    name            = string
+    charset         = string
+    collation       = string
+    deletion_policy = string
+  }))
+  description = "Represents a SQL database inside the Cloud SQL instance, hosted in Google's cloud."
+  default     = []
+}
+
+variable "users" {
+  sensitive = true
+  type      = set(object({
+    name            = string
+    password        = string
+    # The user type. It determines the method to authenticate the user during login. The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".
+    type            = string
+    deletion_policy = string
+    host            = string
+    #    password_policy = set(object({
+    #      allowed_failed_attempts      = number
+    #      password_expiration_duration = number
+    #      enable_failed_attempts_check = bool
+    #      enable_password_verification = bool
+    #      status                       = set(object({
+    #        locked                   = bool
+    #        password_expiration_time = number
+    #      }))
+    #    }))
+  }))
+}

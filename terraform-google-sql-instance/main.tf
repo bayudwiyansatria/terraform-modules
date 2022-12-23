@@ -142,3 +142,24 @@ resource "google_sql_database_instance" "main" {
     }
   }
 }
+
+resource "google_sql_database" "database" {
+  for_each        = toset(var.database)
+  name            = each.value.name
+  instance        = google_sql_database_instance.main.name
+  charset         = each.value.charset
+  collation       = each.value.collation
+  project         = google_sql_database_instance.main.project
+  deletion_policy = each.value.deletion_policy
+}
+
+resource "google_sql_user" "users" {
+  for_each        = toset(var.users)
+  instance        = google_sql_database_instance.main.name
+  name            = each.value.name
+  password        = each.value.password
+  type            = each.value.type
+  deletion_policy = each.value.deletion_policy
+  host            = each.value.host
+  project         = google_sql_database_instance.main.project
+}
