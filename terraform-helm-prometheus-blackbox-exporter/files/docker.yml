@@ -1,0 +1,4 @@
+image:
+  repository: prom/blackbox-exporter
+  tag: v0.20.0
+  pullPolicy: IfNotPresent
