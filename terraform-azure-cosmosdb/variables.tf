@@ -215,7 +215,8 @@ variable "identity" {
   description = ""
   default     = [
     {
-      type = "SystemAssigned"
+      type         = "SystemAssigned"
+      identity_ids = []
     }
   ]
 }
