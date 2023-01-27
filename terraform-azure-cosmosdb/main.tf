@@ -102,7 +102,7 @@ resource "azurerm_cosmosdb_account" "mongo" {
     for_each = var.identity
     content {
       type         = identity.value.type
-      identity_ids = length(identity.value.identity_ids) > 0 ? identity.value.identity_ids : []
+#      identity_ids = length(identity.value.identity_ids) > 0 ? identity.value.identity_ids : []
     }
   }
 
