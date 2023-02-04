@@ -19,6 +19,11 @@ variable "cluster_private_enabled" {
   default = false
 }
 
+variable "cluster_mesh_enabled" {
+  type    = bool
+  default = false
+}
+
 variable "cluster_http_application_routing_enabled" {
   type        = bool
   description = "Http Routing"
@@ -438,6 +443,16 @@ variable "network" {
 variable "network_connector" {
   type = set(object({
     subnet_name = string
+  }))
+  default = []
+}
+
+variable "ingress" {
+  type = set(object({
+    gateway_id   = string
+    gateway_name = string
+    subnet_cidr  = string
+    subnet_id    = string
   }))
   default = []
 }

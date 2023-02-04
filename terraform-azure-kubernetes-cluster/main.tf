@@ -15,6 +15,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   tags                              = var.cluster_tags
   http_application_routing_enabled  = var.cluster_http_application_routing_enabled
   local_account_disabled            = var.cluster_local_account_disabled
+  open_service_mesh_enabled         = var.cluster_mesh_enabled
 
   dynamic "key_vault_secrets_provider" {
     for_each = var.vault
@@ -180,10 +181,15 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   #    }
   #  }
 
-  #  dynamic "ingress_application_gateway" {
-  #    for_each = ""
-  #    content {}
-  #  }
+  dynamic "ingress_application_gateway" {
+    for_each = var.ingress
+    content {
+      gateway_id   = ingress_application_gateway.value.gateway_id
+      gateway_name = ingress_application_gateway.value.gateway_name
+      subnet_id    = ingress_application_gateway.value.subnet_id
+      subnet_cidr  = ingress_application_gateway.value.subnet_cidr
+    }
+  }
 
   dynamic "kubelet_identity" {
     for_each = var.cluster_kubelet

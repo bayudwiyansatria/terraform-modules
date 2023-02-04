@@ -3,7 +3,7 @@ data "azurerm_resource_group" "resource_group" {
 }
 
 locals {
-  ip_filter = length(var.ip_range_filter) > 0 ? join(",", [for s in var.ip_range_filter : format("%q", s)]) : null
+  ip_filter = length(var.ip_range_filter) > 0 ? join(",", [for s in var.ip_range_filter : format("%s", s)]) : null
 }
 
 resource "azurerm_cosmosdb_account" "mongo" {
